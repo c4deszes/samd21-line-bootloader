@@ -23,8 +23,8 @@ static void _fatal(void) {
     while(1);
 }
 
-void BOOT_Initialize(void) {
-    NVMCTRL_REGS->NVMCTRL_CTRLB |= NVMCTRL_CTRLB_RWS_HALF_Val ;
+void Initialize(void) {
+    //NVMCTRL_REGS->NVMCTRL_CTRLB |= NVMCTRL_CTRLB_RWS_HALF_Val ;
     // Uses GCLK2 (OSCULP32K) on POR, then whatever the Application configures
     //WDT_InitializeNormal(&wdt_config);
     
@@ -36,23 +36,7 @@ void BOOT_Initialize(void) {
     GCLK_ConfigureGenerator(GCLK_GEN3, GCLK_GENCTRL_SRC_OSC8M_Val, 1u);
     GCLK_ConfigureGenerator(GCLK_GEN4, GCLK_GENCTRL_SRC_OSC8M_Val, 8u);     // GCLK4 -> 1MHz
 
-    // Self-check
-    BOOT_CheckBootloader();
-    if (!BOOT_IsBootloaderValid()) {
-        _fatal();
-    }
-
-    // Application check
-    BOOTHEADER_Load();
-    if (BOOTHEADER_IsHeaderValid() && !BOOT_IsEntryKeySet()) {
-        BOOT_CheckApplication();
-
-        if (BOOT_IsApplicationValid()) {
-            BOOT_EnterApplication();
-        }
-    }
-
-    // entering bootloader mode
+    BOOT_Initialize();
 
     // Setup communication
     COMM_Initialize();

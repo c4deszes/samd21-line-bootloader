@@ -3,6 +3,7 @@
 #include "hal/dsu.h"
 
 // Addresses coming from the linkerscript
+// TODO: for some reason these are not set correctly
 extern uint32_t __bootheader_start;
 extern uint32_t __bootheader_end;
 
@@ -19,7 +20,7 @@ void BOOTHEADER_Load(void) {
     //                                    __bootheader_end - __bootheader_start);
 }
 
-bool BOOTHEADER_IsHeaderValid(void) {
+bool BOOTHEADER_IsValid(void) {
     // TODO: include crc
     return bootHeaderData.fields.version == BOOTHEADER_VERSION_V1;
 }

@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.20)
 project(
     samd21-line-bootloader
     DESCRIPTION "Bootloader for SAMD21 devices over LINE protocol"
-    LANGUAGES C CXX ASM)
-set(PROJECT_VERSION "0.1.0")
+    LANGUAGES C CXX ASM
+    VERSION 0.1.0)
 
 find_package(Python REQUIRED)
 
@@ -15,6 +15,10 @@ CPMAddPackage("gh:c4deszes/bike-flash-tool#master")
 # Documentation
 #add_subdirectory(docs)
 
+set(BL_GENCODE_DIR ${CMAKE_CURRENT_BINARY_DIR}/gencode)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/metainfo.h.in
+               ${BL_GENCODE_DIR}/metainfo.h)
+
 add_executable(
     bootloader
     EXCLUDE_FROM_ALL
@@ -22,12 +26,13 @@ add_executable(
     src/boot.c
     src/bootheader.c
     src/comm.c
+    src/diag.c
     src/flash.c
     src/init.c
     src/main.c
     src/tasks.c
 )
-target_include_directories(bootloader PRIVATE include)
+target_include_directories(bootloader PRIVATE include ${BL_GENCODE_DIR})
 target_link_libraries(bootloader PRIVATE cmsis
                                          atsamd21e18a-dfp
                                          samd21-hal-api
@@ -52,5 +57,4 @@ dump_size(bootloader)
 add_custom_target(bootloader-full
     DEPENDS bootloader-hex bootloader-lss bootloader-memory
 )
-
 # C:\Tools\srecord\srec_cat.exe .\_build\user-debug\bootloader.hex --intel -crop 0x0000 0x1FFC -CRC32_Little_endian 0x1FFC --CCITT -o abc.hex --intel

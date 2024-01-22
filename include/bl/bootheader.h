@@ -38,14 +38,18 @@ typedef union {
 
 extern bl_BootHeader_t bootHeaderData;
 
+/**
+ * @brief Loads the bootheader and checks it's CRC value
+ */
 void BOOTHEADER_Load(void);
 
 /**
- * @brief Checks whether the header is valid by it's CRC value and version number
+ * @brief Returns true if the bootheader can be considered valid, all operations where the
+ *        bootheader is accessed should be preceeded by this check
  * 
- * @return true 
- * @return false 
+ * @return true Bootheader is correct
+ * @return false Bootheader is invalid
  */
-bool BOOTHEADER_IsHeaderValid(void);
+bool BOOTHEADER_IsValid(void);
 
 #endif // BL_BOOTHEADER_H_

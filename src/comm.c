@@ -16,37 +16,6 @@
 RINGBUFFER_8(COMM_UsartBufferTx, 128);
 RINGBUFFER_8(COMM_UsartBufferRx, 128);
 
-// TODO: not a requirement to reply to this request
-static LINE_Diag_PowerStatus_t power_status = {
-    .U_status = LINE_DIAG_POWER_STATUS_VOLTAGE_OK,
-    .BOD_status = LINE_DIAG_POWER_STATUS_BOD_NONE,
-    .I_operating = LINE_DIAG_POWER_STATUS_OP_CURRENT(100),
-    .I_sleep = LINE_DIAG_POWER_STATUS_SLEEP_CURRENT(100)
-};
-static LINE_Diag_SoftwareVersion_t sw_version = {
-    .major = 0,
-    .minor = 1,
-    .patch = 0
-};
-
-uint8_t LINE_Diag_GetOperationStatus(void) {
-    // TODO: return boot error if the reason for being here is errors with the header, or the app
-    return LINE_DIAG_OP_STATUS_BOOT;
-}
-
-LINE_Diag_PowerStatus_t* LINE_Diag_GetPowerStatus(void) {
-    return &power_status;
-}
-
-uint32_t LINE_Diag_GetSerialNumber(void) {
-    // TODO: load serial number
-    return 0xABCDEF01;
-}
-
-LINE_Diag_SoftwareVersion_t* LINE_Diag_GetSoftwareVersion(void) {
-    return &sw_version;
-}
-
 static uint8_t comm_sercom;
 static uint32_t comm_baudrate;
 static bool comm_onewire;
@@ -74,7 +43,7 @@ static void COMM_LoadDefaults(void) {
 }
 
 static void COMM_LoadConfig(void) {
-    if (BOOTHEADER_IsHeaderValid()) {
+    if (BOOTHEADER_IsValid()) {
         if (bootHeaderData.fields.sercom_id <= SERCOM3 &&
             bootHeaderData.fields.sercom_tx_port == PORT_GROUP_A &&
             bootHeaderData.fields.sercom_rx_port == PORT_GROUP_A &&

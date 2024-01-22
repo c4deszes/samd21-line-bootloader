@@ -5,7 +5,7 @@
 
 int main (void) {
     /* Initialize the application */
-    BOOT_Initialize();
+    Initialize();
 
     /* Starts the scheduler */
     SCH_Enter();
