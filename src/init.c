@@ -19,12 +19,10 @@ const wdt_normal_configuration wdt_config = {
     .period = WDT_TIMEOUT_CYC2048
 };
 
-static void _fatal(void) {
-    while(1);
-}
-
 void Initialize(void) {
     //NVMCTRL_REGS->NVMCTRL_CTRLB |= NVMCTRL_CTRLB_RWS_HALF_Val ;
+
+    // TODO: enable watchdog
     // Uses GCLK2 (OSCULP32K) on POR, then whatever the Application configures
     //WDT_InitializeNormal(&wdt_config);
     
@@ -47,7 +45,7 @@ void Initialize(void) {
     GCLK_SelectGenerator(GCLK_CLKCTRL_ID_TCC0_TCC1_Val, GCLK_GEN4);
     PM_REGS->PM_APBCMASK |= PM_APBCMASK_TCC0_Msk;
     TCC_Reset(TCC0);
-    TCC_SetupTrigger(TCC0, 1000);   // 1000us period
+    TCC_SetupTrigger(TCC0, 1000);   // 1000us = 1ms period
     TCC_Enable(TCC0);
 
     // Enable interrupts
