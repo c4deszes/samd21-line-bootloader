@@ -54,8 +54,7 @@ static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     boot_entry_key = 0LL;
 
     __set_MSP(*(uint32_t *)bootHeaderData.fields.app_start);
-    // TODO: what is the +4 for?
-    uint32_t app_start = bootHeaderData.fields.app_start + 4;
+    uint32_t app_start = bootHeaderData.fields.app_start + 4;    // ResetHandler is the second DWORD
 
     SCB->VTOR = ((uint32_t)app_start & SCB_VTOR_TBLOFF_Msk);
 

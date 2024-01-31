@@ -24,7 +24,10 @@ jobs:
         with:
           name: binary
           path: |
-            _build/armgcc-debug-unix/bootloader.*
+            _build/armgcc-debug-unix/bootloader.elf
+            _build/armgcc-debug-unix/bootloader_with_crc.hex
+            _build/armgcc-debug-unix/bootloader.lss
+            _build/armgcc-debug-unix/bootloader.map
           if-no-files-found: error
 
   docs:
