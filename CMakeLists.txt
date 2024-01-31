@@ -51,10 +51,16 @@ target_link_options(bootloader PRIVATE -Wl,-Map=bootloader.map -Wl,--gc-sections
 
 hexify(TARGET bootloader
        HEX ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex)
+add_custom_target(bootloader-crc
+    COMMAND srec_cat ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex --intel -crop 0x0000 0x1FFC
+            -CRC32_Little_endian 0x1FFC --CCITT -o ${CMAKE_CURRENT_BINARY_DIR}/bootloader_with_crc.hex --intel
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex
+    BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bootloader_with_crc.hex
+)
+
 dump_symbols(bootloader ${CMAKE_CURRENT_BINARY_DIR}/bootloader.lss)
 dump_size(bootloader)
 
 add_custom_target(bootloader-full
-    DEPENDS bootloader-hex bootloader-lss bootloader-memory
+    DEPENDS bootloader-hex bootloader-crc bootloader-lss bootloader-memory
 )
-# C:\Tools\srecord\srec_cat.exe .\_build\user-debug\bootloader.hex --intel -crop 0x0000 0x1FFC -CRC32_Little_endian 0x1FFC --CCITT -o abc.hex --intel
