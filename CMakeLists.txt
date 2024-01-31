@@ -9,7 +9,7 @@ project(
 find_package(Python REQUIRED)
 
 include(tools/cmake/CPM.cmake)
-CPMAddPackage("gh:c4deszes/samd21-hal#master")
+CPMAddPackage("gh:c4deszes/samd21-hal#feature/dsu-nvm-fixes")
 CPMAddPackage("gh:c4deszes/bike-flash-tool#master")
 
 # Documentation

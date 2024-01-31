@@ -21,7 +21,8 @@ uint16_t current_row = 0xFFFF;
 uint8_t page_write_status = FLASH_LINE_PAGE_NOT_WRITTEN;
 
 uint16_t GetRowNumber(uint32_t address) {
-    return address / (128 * 4);
+    // TODO: incorporate page size
+    return address / (64 * 4);
 }
 
 bool IsRowValid(uint16_t row) {
@@ -38,11 +39,11 @@ void FLASH_BL_OnPageWrite(uint32_t address, uint8_t size, uint8_t* data) {
         // return address failure
         page_write_status = FLASH_LINE_PAGE_ADDRESS_ERROR;
     }
-    else if (size != 128) {
+    else if (size != 64) {
         page_write_status = FLASH_LINE_PAGE_ADDRESS_ERROR;
     }
     // TODO: 
-    else if (address % 128 != 0 || address < 0x2000UL) {
+    else if (address % 64 != 0 || address < 0x2000UL) {
         page_write_status = FLASH_LINE_PAGE_ADDRESS_ERROR;
     }
     else if (new_row != current_row) {
@@ -51,7 +52,8 @@ void FLASH_BL_OnPageWrite(uint32_t address, uint8_t size, uint8_t* data) {
         // }
 
         // start new row writing
-        NVMCTRL_EraseRow(new_row);
+        // TODO: incorporate page size into this
+        NVMCTRL_EraseRow(new_row * 64);
         // load cache
         // erase row
         // write cache
