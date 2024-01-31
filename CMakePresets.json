@@ -1,8 +1,8 @@
 {
-    "version": 2,
+    "version": 6,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 20,
+        "minor": 27,
         "patch": 0
     },
     "configurePresets": [
@@ -23,19 +23,19 @@
             }
         },
         {
-            "name": "armgcc-release-mingw",
-            "inherits": "armgcc-default",
-            "generator": "MinGW Makefiles",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
             "name": "armgcc-debug-unix",
             "inherits": "armgcc-default",
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "armgcc-release-mingw",
+            "inherits": "armgcc-default",
+            "generator": "MinGW Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
@@ -54,8 +54,14 @@
             "hidden": true
         },
         {
-            "name": "build-docs",
-            "targets": [ "Sphinx" ]
+            "name": "build-app-armgcc-release-unix",
+            "inherits": "build-app",
+            "configurePreset": "armgcc-release-unix"
+        },
+        {
+            "name": "build-app-armgcc-debug-unix",
+            "inherits": "build-app",
+            "configurePreset": "armgcc-debug-unix"
         }
     ]
 }

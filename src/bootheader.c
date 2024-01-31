@@ -13,14 +13,12 @@ uint32_t bootHeaderCrc __attribute__((section(".bl_header.crc")));
 static uint32_t calculatedHeaderCrc;
 
 void BOOTHEADER_Load(void) {
-    // Load from start address
-    // TODO: calcualte CRC
-    // calculatedHeaderCrc = DSU_CalculateCRC32(0xFFFFFFFFUL,
-    //                                    (void*)__bootheader_start,
-    //                                    __bootheader_end - __bootheader_start);
+    // TODO: use addresses from linkerscript
+    calculatedHeaderCrc = DSU_CalculateCRC32(0xFFFFFFFFUL,
+                                       (void*)0x3FF80,
+                                       128 - 4);
 }
 
 bool BOOTHEADER_IsValid(void) {
-    // TODO: include crc
-    return bootHeaderData.fields.version == BOOTHEADER_VERSION_V1;
+    return bootHeaderData.fields.version == BOOTHEADER_VERSION_V1 && calculatedHeaderCrc == bootHeaderCrc;
 }

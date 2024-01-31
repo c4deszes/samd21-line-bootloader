@@ -10,10 +10,14 @@ typedef union {
     struct {
         uint8_t version;
         uint8_t padding[3];
+
         uint32_t app_start;
         uint32_t app_end;
+        uint32_t app_rom_crc;
+
         uint32_t data_start;
         uint32_t data_end;
+        uint32_t data_rom_crc;
 
         uint8_t sercom_id;
         uint8_t sercom_baudrate;  // * 4800 (2 -> 9600)

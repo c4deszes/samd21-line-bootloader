@@ -1,6 +1,7 @@
 #include "bl/boot.h"
 #include "hal/dsu.h"
 #include "hal/nvmctrl.h"
+#include "hal/wdt.h"
 
 #include "bl/config.h"
 #include "bl/bootheader.h"
@@ -19,21 +20,46 @@ uint64_t boot_entry_key __attribute__((section(".bl_shared_ram")));
 
 static boot_state_t boot_state;
 static uint32_t calculated_bootrom_crc;
-static uint32_t calculted_approm_crc;
+static uint32_t calculated_approm_crc;
 
 static bool BOOT_AppCheckCrc(void) {
-    //calculted_approm_crc = DSU_CalculateCRC32(0xFFFFFFFFUL, 0x0000UL, (0x2000UL - 4) / 4);
+    if (!BOOTHEADER_IsValid()) {
+        return false;
+    }
 
-    // TODO: compare
+    if (bootHeaderData.fields.app_start == bootHeaderData.fields.app_end) {
+        return false;
+    }
 
-    return false;
+    if (bootHeaderData.fields.app_start > bootHeaderData.fields.app_end) {
+        return false;
+    }
+
+    // TODO: check app minimum size
+
+    calculated_approm_crc = DSU_CalculateCRC32(0xFFFFFFFFUL,
+                                               (void*)bootHeaderData.fields.app_start,
+                                               bootHeaderData.fields.app_end - bootHeaderData.fields.app_start);
+
+    return (calculated_approm_crc == bootHeaderData.fields.app_rom_crc);
 }
 
-void __attribute__((noreturn)) BOOT_EnterApplication(void) {
+static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     // TODO: Disable WDT before
-    // 1. clear the shared memory to 0
-    // 2. setup vector table, etc.
-    // 3. jump to app
+    //WDT_Wind
+
+    // TODO: disable interrupts
+    __disable_irq();
+
+    boot_entry_key = 0LL;
+
+    __set_MSP(*(uint32_t *)bootHeaderData.fields.app_start);
+    uint32_t app_start = bootHeaderData.fields.app_start + 4;    // ResetHandler is the second DWORD
+
+    SCB->VTOR = ((uint32_t)app_start & SCB_VTOR_TBLOFF_Msk);
+
+    asm("bx %0" ::"r"(app_start));
+
     while(1);
 }
 
@@ -44,7 +70,8 @@ void BOOT_Initialize(void) {
 
     boot_state = boot_state_init;
 
-    //calculated_bootrom_crc = DSU_CalculateCRC32(0xFFFFFFFFUL, 0x0000UL, (0x2000UL - 4) / 4);
+    // TODO: use addresses from linkerscript
+    calculated_bootrom_crc = DSU_CalculateCRC32(0xFFFFFFFFUL, 0x0000UL, 0x2000UL - 4);
 
     // TODO: if the CRC is wrong then halt here
     // if (calculated_bootrom_crc != bootrom_crc) {
@@ -59,6 +86,7 @@ void BOOT_Initialize(void) {
         boot_state = boot_state_header_error;
     }
     else if (BOOTHEADER_IsValid() && boot_entry_key != BOOT_ENTRY_MAGIC) {
+        // TODO: could call tryEnterApp here
         if (BOOT_AppCheckCrc()) {
             BOOT_EnterApplication();
         }
@@ -76,6 +104,11 @@ boot_state_t BOOT_GetState(void) {
 }
 
 bool BOOT_TryEnterApplication(void) {
-    // TODO: implement, check header, check app
+    if (BOOT_AppCheckCrc()) {
+        BOOT_EnterApplication();
+
+        // doesn't return
+        return true;
+    }
     return false;
 }
