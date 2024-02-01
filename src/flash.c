@@ -38,7 +38,7 @@ void FLASH_BL_OnPageWrite(uint32_t address, uint8_t size, uint8_t* data) {
     if (!IsRowValid(new_row)) {
         // return address failure
         page_write_status = FLASH_LINE_PAGE_ADDRESS_ERROR;
-    }
+    } 
     else if (size != 64) {
         page_write_status = FLASH_LINE_PAGE_ADDRESS_ERROR;
     }
@@ -53,7 +53,7 @@ void FLASH_BL_OnPageWrite(uint32_t address, uint8_t size, uint8_t* data) {
 
         // start new row writing
         // TODO: incorporate page size into this
-        NVMCTRL_EraseRow(new_row * 64);
+        NVMCTRL_EraseRow(new_row * 64UL);
         // load cache
         // erase row
         // write cache
