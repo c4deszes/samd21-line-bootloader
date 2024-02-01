@@ -7,7 +7,7 @@ ENTRY(Reset_Handler)
 MEMORY
 {
   bl_rom (LRX) : ORIGIN = 0x0, LENGTH = 0x02000
-  app_rom (WXR) : ORIGIN = 0x02000, LENGTH = 0x3DF00
+  app_rom (WXR) : ORIGIN = 0x02000, LENGTH = 0x4000
   bl_header (WR) : ORIGIN = 0x3FF80, LENGTH = 0x080
   bl_shared_ram (WX!R): ORIGIN = 0x20000000, LENGTH = 0x0008
   ram (WX!R) : ORIGIN = 0x20000008, LENGTH = 0x7FF8

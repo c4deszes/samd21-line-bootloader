@@ -4,6 +4,7 @@
 #include "hal/wdt.h"
 
 #include "bl/config.h"
+#include "bl/api.h"
 #include "bl/bootheader.h"
 
 #include <stdint.h>
