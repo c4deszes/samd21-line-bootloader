@@ -17,9 +17,7 @@ target_link_libraries(application PRIVATE cmsis
                                          flash-line-api flash-line-sources
                                          bootloader-api
 )
-target_compile_options(application PRIVATE "-mcpu=cortex-m0" "-gdwarf-2" "-mthumb")
 set_target_properties(application PROPERTIES SUFFIX ".elf")
-target_link_options(application PRIVATE "-mcpu=cortex-m0" "-mthumb")
 target_link_directories(application PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_options(application PRIVATE -Tapplication.ld)
 target_link_options(application PRIVATE -Wl,-Map=application.map -Wl,--gc-sections)

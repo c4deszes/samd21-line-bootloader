@@ -9,22 +9,20 @@
 #include "hal/wdt.h"
 #include "hal/tcc.h"
 #include "hal/nvic.h"
+#include "hal/nvmctrl.h"
 #include "hal/sysctrl.h"
 
 #include "common/scheduler.h"
 
 #include "atsamd21e18a.h"
 
-const wdt_normal_configuration wdt_config = {
-    .period = WDT_TIMEOUT_CYC2048
-};
-
 void Initialize(void) {
-    //NVMCTRL_REGS->NVMCTRL_CTRLB |= NVMCTRL_CTRLB_RWS_HALF_Val ;
-
     // TODO: enable watchdog
     // Uses GCLK2 (OSCULP32K) on POR, then whatever the Application configures
     //WDT_InitializeNormal(&wdt_config);
+    BOOT_Initialize();
+
+    NVMCTRL_SetAutoPageWrite(false);
     
     // TODO: these should not be called, according to docs these are by default enabled on POR?
     SYSCTRL_EnableInternalOSC32K();
@@ -33,8 +31,6 @@ void Initialize(void) {
 
     GCLK_ConfigureGenerator(GCLK_GEN3, GCLK_GENCTRL_SRC_OSC8M_Val, 1u);
     GCLK_ConfigureGenerator(GCLK_GEN4, GCLK_GENCTRL_SRC_OSC8M_Val, 8u);     // GCLK4 -> 1MHz
-
-    BOOT_Initialize();
 
     // Setup communication
     COMM_Initialize();

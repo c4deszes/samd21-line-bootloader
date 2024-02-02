@@ -48,25 +48,45 @@ static bool BOOT_AppCheckCrc(void) {
 static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     // TODO: Disable WDT before
     //WDT_Wind
+    boot_entry_key = 0LL;
+    //uint32_t app_start = 0x2000 + 4;
+    //uint32_t initial_stack_pointer = *((uint32_t *)0x2000);
+    //uint8_t i;
 
     // TODO: disable interrupts
     __disable_irq();
+    __DMB();
 
-    boot_entry_key = 0LL;
+    // SysTick->CTRL = 0;
+    // SysTick->LOAD = 0;
+    // SysTick->VAL = 0;
 
-    __set_MSP(*(uint32_t *)bootHeaderData.fields.app_start);
-    uint32_t app_start = bootHeaderData.fields.app_start + 4;    // ResetHandler is the second DWORD
+    // // Disable IRQs & clear pending IRQs
+    // for (i = 0; i < 8; i++) {
+    //     NVIC->IP[i] = 0x00000000;
+    // }
+    // NVIC->ICER[0] = 0xFFFFFFFF;
+    // NVIC->ICPR[0] = 0xFFFFFFFF;
 
-    SCB->VTOR = ((uint32_t)app_start & SCB_VTOR_TBLOFF_Msk);
+    void (*application_code_entry)(void);
 
-    asm("bx %0" ::"r"(app_start));
+    __set_MSP(*((uint32_t *)0x2000));
+
+    SCB->VTOR = (((uint32_t)0x2000) & SCB_VTOR_TBLOFF_Msk);
+    //__DMB();
+
+    // TODO: why is this not working?
+    //asm("bx %0" ::"r"(0x2004UL));
+
+    application_code_entry = (void (*)(void))(unsigned *)(*(unsigned *)(0x2000 + 4));
+    /* Jump to user Reset Handler in the application */
+    application_code_entry();
 
     while(1);
 }
 
 void BOOT_Initialize(void) {
     NVMCTRL_REGS->NVMCTRL_CTRLB = NVMCTRL_CTRLB_RWS_HALF;
-    NVMCTRL_SetAutoPageWrite(false);
     //NVMCTRL_SetReadWaitStates(NVMCTRL_CTRLB_RWS_HALF_Val);
 
     boot_state = boot_state_init;

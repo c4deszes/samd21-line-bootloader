@@ -162,14 +162,12 @@ SECTIONS
     _end = . ;
     _ram_end_ = ORIGIN(ram) + LENGTH(ram) -1 ;
 
-    .bl_header : {
+    .bl_header (NOLOAD) : {
         . = ALIGN(4);
         __bootheader_start = .;
-        KEEP(*(.bl_header.data));
-        FILL(0xFFFFFFFF);
-        . = ORIGIN(bl_header) + LENGTH(bl_header) - 4;      /* Note shorter to accommodate following LONG */
+        *(.bl_header.data);
         __bootheader_end = .;
-        KEEP(*(.bl_header.crc));
+        *(.bl_header.crc);
         . = ALIGN(4);
     } > bl_header
 }

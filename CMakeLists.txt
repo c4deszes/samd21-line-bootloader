@@ -49,9 +49,7 @@ target_link_libraries(bootloader PRIVATE cmsis
                                          flash-line-api flash-line-sources
                                          bootloader-api
 )
-target_compile_options(bootloader PRIVATE "-mcpu=cortex-m0" "-gdwarf-2" "-mthumb")
 set_target_properties(bootloader PROPERTIES SUFFIX ".elf")
-target_link_options(bootloader PRIVATE "-mcpu=cortex-m0" "-mthumb")
 target_link_options(bootloader PRIVATE -Tbootloader.ld)
 target_link_options(bootloader PRIVATE -Wl,-Map=bootloader.map -Wl,--gc-sections)
 
