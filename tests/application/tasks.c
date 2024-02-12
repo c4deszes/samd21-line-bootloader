@@ -1,5 +1,7 @@
 #include "hal/sercom_usart.h"
 
+#include "hal/dsu.h"
+#include "common/scheduler.h"
 #include "line_protocol.h"
 #include "common/swtimer.h"
 

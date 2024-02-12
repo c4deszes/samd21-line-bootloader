@@ -46,7 +46,7 @@ void Initialize(void) {
     SERCOM_USART_SetupAsync(
         SERCOM0,
         8000000UL,
-        19200,
+        19200UL,
         0,
         1,
         &COMM_UsartBufferTx,
@@ -56,6 +56,7 @@ void Initialize(void) {
 
     LINE_Transport_Init(true);
     LINE_App_Init();
+    LINE_Diag_SetAddress(0x06);
     FLASH_LINE_Init(FLASH_LINE_APPLICATION_MODE);
 
     // Setup scheduler

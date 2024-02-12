@@ -133,3 +133,29 @@ bool BOOT_TryEnterApplication(void) {
     }
     return false;
 }
+
+static uint32_t phantomISR = 9999;
+
+void HardFault_Handler(void) {
+    while(1) {
+        phantomISR = __get_IPSR();
+    }
+}
+
+void SVCall_Handler(void) {
+    while(1) {
+        phantomISR = __get_IPSR();
+    }
+}
+
+void PendSV_Handler(void) {
+    while(1) {
+        phantomISR = __get_IPSR();
+    }
+}
+
+void SysTick_Handler(void) {
+    while(1) {
+        phantomISR = __get_IPSR();
+    }
+}

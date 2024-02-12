@@ -22,6 +22,8 @@ void Initialize(void) {
     //WDT_InitializeNormal(&wdt_config);
     BOOT_Initialize();
 
+    // TODO: likely not needed, also comes at a performance penalty
+    //NVMCTRL_REGS->NVMCTRL_CTRLB |= NVMCTRL_CTRLB_CACHEDIS_Msk;
     NVMCTRL_SetAutoPageWrite(false);
     
     // TODO: these should not be called, according to docs these are by default enabled on POR?
