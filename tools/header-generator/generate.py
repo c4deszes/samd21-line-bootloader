@@ -88,12 +88,12 @@ if __name__ == '__main__':
     bootheader.append(cs_pin[0])
     bootheader.append(cs_pin[1])
 
-    for i in range(len(bootheader), 124):
+    for i in range(len(bootheader), 252):
         bootheader += [0xFF]
 
     bootheader += int.to_bytes(crc32(bootheader), length=4, byteorder='little')
 
-    output_file[0x3FF80:0x3FF80+128] = bootheader
+    output_file[0x3FF00:0x3FF00+256] = bootheader
     output_file.write_hex_file(args.output, byte_count=16)
 
     # 2. go through keys and add them to the data buffer

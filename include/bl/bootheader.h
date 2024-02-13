@@ -37,7 +37,7 @@ typedef union {
         uint8_t sercom_cs_port;
         uint8_t sercom_cs_pin;
     } fields;
-    uint8_t data[124];
+    uint8_t data[252];
 } bl_BootHeader_t;
 
 extern bl_BootHeader_t bootHeaderData;

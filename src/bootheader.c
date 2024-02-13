@@ -15,8 +15,8 @@ static uint32_t calculatedHeaderCrc;
 void BOOTHEADER_Load(void) {
     // TODO: use addresses from linkerscript
     calculatedHeaderCrc = DSU_CalculateCRC32(0xFFFFFFFFUL,
-                                       (void*)0x3FF80,
-                                       128 - 4);
+                                       (void*)0x3FF00,
+                                       256 - 4);
 }
 
 bool BOOTHEADER_IsValid(void) {
