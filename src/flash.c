@@ -1,13 +1,3 @@
-/**
- * @file flash.c
- * @author your name (you@domain.com)
- * @brief Implements flash-line-library functions
- * @version 0.1
- * @date 2024-01-21
- * 
- * @copyright Copyright (c) 2024
- * 
- */
 #include "flash_line_api.h"
 #include "bl/boot.h"
 #include "hal/nvmctrl.h"

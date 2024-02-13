@@ -48,7 +48,7 @@ static bool BOOT_AppCheckCrc(void) {
 static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     // TODO: Disable WDT before
     //WDT_Wind
-    boot_entry_key = 0LL;
+    boot_entry_key = 0ULL;
     //uint32_t app_start = 0x2000 + 4;
     //uint32_t initial_stack_pointer = *((uint32_t *)0x2000);
     //uint8_t i;
@@ -124,14 +124,9 @@ boot_state_t BOOT_GetState(void) {
     return boot_state;
 }
 
-bool BOOT_TryEnterApplication(void) {
-    if (BOOT_AppCheckCrc()) {
-        BOOT_EnterApplication();
-
-        // doesn't return
-        return true;
-    }
-    return false;
+void BOOT_TryEnterApplication(void) {
+    boot_entry_key = 0ULL;
+    NVIC_SystemReset();
 }
 
 static uint32_t phantomISR = 9999;

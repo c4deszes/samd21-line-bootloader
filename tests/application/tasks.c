@@ -3,7 +3,11 @@
 #include "hal/dsu.h"
 #include "common/scheduler.h"
 #include "line_protocol.h"
+#include "bl/api.h"
+#include "flash_line_api.h"
 #include "common/swtimer.h"
+
+#include "atsamd21e18a.h"
 
 static LINE_Diag_SoftwareVersion_t sw_version = {
     .major = 1,
@@ -21,6 +25,16 @@ uint32_t LINE_Diag_GetSerialNumber(void) {
 
 LINE_Diag_SoftwareVersion_t* LINE_Diag_GetSoftwareVersion(void) {
     return &sw_version;
+}
+
+uint64_t boot_entry_key __attribute__((section(".bl_shared_ram")));
+static bool bootResetFlag = false;
+
+uint8_t FLASH_BL_EnterBoot(void) {
+    boot_entry_key = BOOT_ENTRY_MAGIC;
+    bootResetFlag = true;
+
+    return FLASH_LINE_BOOT_ENTRY_SUCCESS;
 }
 
 void COMM_Update(void) {
@@ -47,4 +61,8 @@ void SCH_Task1ms(void) {
     SWTIMER_Update1ms();
 
     COMM_Update();
+
+    if (bootResetFlag) {
+        NVIC_SystemReset();
+    }
 }
