@@ -47,39 +47,20 @@ static bool BOOT_AppCheckCrc(void) {
 
 static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     // TODO: Disable WDT before
-    //WDT_Wind
+
     boot_entry_key = 0ULL;
-    //uint32_t app_start = 0x2000 + 4;
-    //uint32_t initial_stack_pointer = *((uint32_t *)0x2000);
-    //uint8_t i;
+    uint32_t app_start = bootHeaderData.fields.app_start + 4UL;
+    uint32_t initial_stack_pointer = bootHeaderData.fields.app_start;
+    void (*application_code_entry)(void);
+    application_code_entry = (void (*)(void))(unsigned *)(*(unsigned *)(app_start));
 
     // TODO: disable interrupts
     __disable_irq();
     __DMB();
 
-    // SysTick->CTRL = 0;
-    // SysTick->LOAD = 0;
-    // SysTick->VAL = 0;
+    __set_MSP(*((uint32_t *)initial_stack_pointer));
+    SCB->VTOR = (((uint32_t)initial_stack_pointer) & SCB_VTOR_TBLOFF_Msk);
 
-    // // Disable IRQs & clear pending IRQs
-    // for (i = 0; i < 8; i++) {
-    //     NVIC->IP[i] = 0x00000000;
-    // }
-    // NVIC->ICER[0] = 0xFFFFFFFF;
-    // NVIC->ICPR[0] = 0xFFFFFFFF;
-
-    void (*application_code_entry)(void);
-
-    __set_MSP(*((uint32_t *)0x2000));
-
-    SCB->VTOR = (((uint32_t)0x2000) & SCB_VTOR_TBLOFF_Msk);
-    //__DMB();
-
-    // TODO: why is this not working?
-    //asm("bx %0" ::"r"(0x2004UL));
-
-    application_code_entry = (void (*)(void))(unsigned *)(*(unsigned *)(0x2000 + 4));
-    /* Jump to user Reset Handler in the application */
     application_code_entry();
 
     while(1);
@@ -100,7 +81,6 @@ void BOOT_Initialize(void) {
     //     _fatal();
     // }
 
-    // Checking header and the application
     BOOTHEADER_Load();
 
     if (!BOOTHEADER_IsValid()) {
