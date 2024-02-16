@@ -10,7 +10,8 @@
             "name": "armgcc-default",
             "binaryDir": "${sourceDir}/_build/${presetName}",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/tools/cmake/armgcc-toolchain.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/tools/cmake/armgcc-toolchain.cmake",
+                "SAMD21_LINE_BL_BUILD_TESTS": "ON"
             },
             "hidden": true
         },
@@ -50,7 +51,7 @@
     "buildPresets": [
         {
             "name": "build-app",
-            "targets": [ "bootloader-full"],
+            "targets": [ "bootloader-full", "application-full"],
             "hidden": true
         },
         {

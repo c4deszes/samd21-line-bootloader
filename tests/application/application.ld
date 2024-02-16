@@ -10,13 +10,13 @@ SECTIONS
     .vectors :
     {
         . = ALIGN(4);
-        __bootrom_start = .;
+        __approm_start = .;
         _sfixed = .;
         KEEP(*(.vectors .vectors.* .vectors_default .vectors_default.*))
         KEEP(*(.isr_vector))
         KEEP(*(.reset*))
         KEEP(*(.after_vectors))
-    } > bl_rom
+    } > app_rom
     /*
      * Code Sections - Note that standard input sections such as
      * *(.text), *(.text.*), *(.rodata), & *(.rodata.*)
@@ -68,14 +68,14 @@ SECTIONS
 
         . = ALIGN(4);
         _efixed = .;            /* End of text section */
-    } > bl_rom
+    } > app_rom
 
     /* .ARM.exidx is sorted, so has to go in its own output section.  */
     PROVIDE_HIDDEN (__exidx_start = .);
     .ARM.exidx :
     {
       *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    } > bl_rom
+    } > app_rom
     PROVIDE_HIDDEN (__exidx_end = .);
 
     . = ALIGN(4);
@@ -113,14 +113,14 @@ SECTIONS
 		/* All data end */
 		__data_end__ = .;
         _data_sizeof = SIZEOF(.data);
-	} > ram AT > bl_rom
+	} > ram AT > app_rom
 
-    .bl_rom_fill : {
+    .app_rom_fill : {
         FILL(0xFFFFFFFF);
-        . = ORIGIN(bl_rom) + LENGTH(bl_rom) - 4;
-        __bootrom_end = .;
-        KEEP(*(.bl_rom.crc));
-    } > bl_rom
+        . = ORIGIN(app_rom) + LENGTH(app_rom) - 4;
+        __approm_end = .;
+        LONG(0xFFFFFFFF)
+    } > app_rom
 
     /*
      *  Align here to ensure that the .bss section occupies space up to
@@ -162,12 +162,14 @@ SECTIONS
     _end = . ;
     _ram_end_ = ORIGIN(ram) + LENGTH(ram) -1 ;
 
-    .bl_header (NOLOAD) : {
+    .bl_header : {
         . = ALIGN(4);
         __bootheader_start = .;
-        *(.bl_header.data);
+        KEEP(*(.bl_header.data));
+        FILL(0xFFFFFFFF);
+        . = ORIGIN(bl_header) + LENGTH(bl_header) - 4;      /* Note shorter to accommodate following LONG */
         __bootheader_end = .;
-        *(.bl_header.crc);
+        KEEP(*(.bl_header.crc));
         . = ALIGN(4);
     } > bl_header
 }

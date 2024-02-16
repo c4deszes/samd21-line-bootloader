@@ -27,12 +27,6 @@ void BOOT_Initialize(void);
  */
 boot_state_t BOOT_GetState(void);
 
-/**
- * @brief Attempts application entry
- * 
- * @return true Function never returns with this value
- * @return false If entry failed
- */
-bool BOOT_TryEnterApplication(void);
+void BOOT_TryEnterApplication(void);
 
 #endif // BL_BOOT_H_

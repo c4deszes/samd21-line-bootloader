@@ -6,10 +6,12 @@ project(
     LANGUAGES C CXX ASM
     VERSION 0.1.0)
 
+option(SAMD21_LINE_BL_BUILD_TESTS "Enables library test cases" OFF)
+
 find_package(Python REQUIRED)
 
 include(tools/cmake/CPM.cmake)
-CPMAddPackage("gh:c4deszes/samd21-hal#master")
+CPMAddPackage("gh:c4deszes/samd21-hal#feature/dsu-nvm-fixes")
 CPMAddPackage("gh:c4deszes/bike-flash-tool#master")
 
 # Documentation
@@ -18,6 +20,10 @@ CPMAddPackage("gh:c4deszes/bike-flash-tool#master")
 set(BL_GENCODE_DIR ${CMAKE_CURRENT_BINARY_DIR}/gencode)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/metainfo.h.in
                ${BL_GENCODE_DIR}/metainfo.h)
+
+add_library(bootloader-api INTERFACE)
+target_include_directories(bootloader-api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/api)
+target_link_directories(bootloader-api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ld)
 
 add_executable(
     bootloader
@@ -41,11 +47,9 @@ target_link_libraries(bootloader PRIVATE cmsis
                                          line-protocol-api line-protocol-sources
                                          line-protocol-adapter-sources
                                          flash-line-api flash-line-sources
+                                         bootloader-api
 )
-target_compile_options(bootloader PRIVATE "-mcpu=cortex-m0" "-gdwarf-2" "-mthumb")
 set_target_properties(bootloader PROPERTIES SUFFIX ".elf")
-target_link_options(bootloader PRIVATE "-mcpu=cortex-m0" "-mthumb")
-target_link_directories(bootloader PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ld)
 target_link_options(bootloader PRIVATE -Tbootloader.ld)
 target_link_options(bootloader PRIVATE -Wl,-Map=bootloader.map -Wl,--gc-sections)
 
@@ -64,3 +68,7 @@ dump_size(bootloader)
 add_custom_target(bootloader-full
     DEPENDS bootloader-hex bootloader-crc bootloader-lss bootloader-memory
 )
+
+if(SAMD21_LINE_BL_BUILD_TESTS)
+    add_subdirectory(tests/application)
+endif()

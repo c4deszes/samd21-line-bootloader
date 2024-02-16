@@ -5,8 +5,6 @@
 #include "hal/gpio.h"
 #include "hal/sercom_usart.h"
 
-#define BOOT_ENTRY_MAGIC 0x6969000083459776LL
-
 #define COMM_DEFAULT_SERCOM SERCOM3
 #define COMM_DEFAULT_BAUDRATE 19200
 #define COMM_DEFAULT_ONE_WIRE false
