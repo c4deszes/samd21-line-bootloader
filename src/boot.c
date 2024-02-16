@@ -66,6 +66,10 @@ static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     while(1);
 }
 
+void _fatal() {
+    while(1);
+}
+
 void BOOT_Initialize(void) {
     NVMCTRL_REGS->NVMCTRL_CTRLB = NVMCTRL_CTRLB_RWS_HALF;
     //NVMCTRL_SetReadWaitStates(NVMCTRL_CTRLB_RWS_HALF_Val);
@@ -76,10 +80,10 @@ void BOOT_Initialize(void) {
     calculated_bootrom_crc = DSU_CalculateCRC32(0xFFFFFFFFUL, 0x0000UL, 0x2000UL - 4);
 
     // TODO: if the CRC is wrong then halt here
-    // if (calculated_bootrom_crc != bootrom_crc) {
-    //      boot_state = boot_state_rom_error;
-    //     _fatal();
-    // }
+    if (calculated_bootrom_crc != bootrom_crc) {
+         boot_state = boot_state_rom_error;
+        _fatal();
+    }
 
     BOOTHEADER_Load();
 
