@@ -42,7 +42,6 @@ if __name__ == '__main__':
         segments = app_hex.segments()
         if len(segments) != 1:
             raise ValueError('Cant do CRC32 calculation on non continuous application.')
-        print(f"Start: {segments[0][0]:X}, End: {segments[0][1]:X}")
         crc = crc32(app_hex.tobinarray(segments[0][0], segments[0][1]-1))
         bootheader += list(int.to_bytes(segments[0][0], length=4, byteorder='little'))
         bootheader += list(int.to_bytes(segments[0][1], length=4, byteorder='little'))

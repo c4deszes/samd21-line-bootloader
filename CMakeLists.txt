@@ -65,6 +65,36 @@ add_custom_target(bootloader-crc
 dump_symbols(bootloader ${CMAKE_CURRENT_BINARY_DIR}/bootloader.lss)
 dump_size(bootloader)
 
+function(bootloader_header)
+cmake_parse_arguments(
+    ""
+    ""
+    "TARGET;OUTPUT;CONFIG;APPLICATION"
+    ""
+    ${ARGN}
+)
+
+    if(DEFINED _APPLICATION)
+        add_custom_target(
+            ${_TARGET}
+            COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/tools/header-generator/generate.py
+                    ${_CONFIG} --application ${_APPLICATION} --output ${_OUTPUT}
+            DEPENDS ${_CONFIG} ${_APPLICATION}
+            BYPRODUCTS ${_OUTPUT}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+    else()
+        add_custom_target(
+            ${_TARGET}
+            COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/tools/header-generator/generate.py
+                    ${_CONFIG} --output ${_OUTPUT}
+            DEPENDS ${_CONFIG}
+            BYPRODUCTS ${_OUTPUT}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+    endif()
+endfunction()
+
 add_custom_target(bootloader-full
     DEPENDS bootloader-hex bootloader-crc bootloader-lss bootloader-memory
 )

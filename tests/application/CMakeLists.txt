@@ -25,6 +25,19 @@ target_link_options(application PRIVATE -Wl,-Map=application.map -Wl,--gc-sectio
 hexify(TARGET application
        HEX ${CMAKE_CURRENT_BINARY_DIR}/application.hex)
 
+bootloader_header(
+    TARGET factory_header
+    CONFIG config.json
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/factory_header.hex
+)
+
+bootloader_header(
+    TARGET app_header
+    CONFIG config.json
+    APPLICATION ${CMAKE_CURRENT_BINARY_DIR}/application.hex
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/app_header.hex
+)
+
 dump_symbols(application ${CMAKE_CURRENT_BINARY_DIR}/application.lss)
 dump_size(application)
 

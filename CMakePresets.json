@@ -51,7 +51,7 @@
     "buildPresets": [
         {
             "name": "build-app",
-            "targets": [ "bootloader-full", "application-full"],
+            "targets": [ "bootloader-full", "application-full", "factory_header", "app_header"],
             "hidden": true
         },
         {
