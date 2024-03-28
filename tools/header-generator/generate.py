@@ -7,6 +7,8 @@ SERCOM_MAPPING = {
     "PA08": (0, 0),
     "PA09": (0, 1),
     # TODO: add the rest
+    "PA24": (3, 2),
+    "PA25": (3, 3)
 }
 
 def crc32(msg):
