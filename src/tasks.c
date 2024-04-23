@@ -10,5 +10,6 @@ void SCH_Task1ms(void) {
 }
 
 void SCH_Task10ms_A(void) {
+    // TODO: enable watchdog
     // WDT_Acknowledge();
 }

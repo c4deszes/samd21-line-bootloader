@@ -135,6 +135,23 @@ void COMM_Initialize(void) {
     FLASH_LINE_Init(FLASH_LINE_BOOTLOADER_MODE);
 }
 
+
+void SERCOM0_Interrupt(void) {
+    SERCOM_USART_InterruptHandler(SERCOM0);
+}
+
+void SERCOM1_Interrupt(void) {
+    SERCOM_USART_InterruptHandler(SERCOM1);
+}
+
+void SERCOM2_Interrupt(void) {
+    SERCOM_USART_InterruptHandler(SERCOM2);
+}
+
+void SERCOM3_Interrupt(void) {
+    SERCOM_USART_InterruptHandler(SERCOM3);
+}
+
 void COMM_Update(void) {
     uint8_t length = SERCOM_USART_Available(comm_sercom);
     while (length > 0) {

@@ -14,6 +14,7 @@
 
 #include "common/scheduler.h"
 
+// TODO: remove this once direct register access is removed
 #include "atsamd21e18a.h"
 
 void Initialize(void) {
@@ -22,11 +23,8 @@ void Initialize(void) {
     //WDT_InitializeNormal(&wdt_config);
     BOOT_Initialize();
 
-    // TODO: likely not needed, also comes at a performance penalty
-    //NVMCTRL_REGS->NVMCTRL_CTRLB |= NVMCTRL_CTRLB_CACHEDIS_Msk;
     NVMCTRL_SetAutoPageWrite(false);
-    
-    // TODO: these should not be called, according to docs these are by default enabled on POR?
+
     SYSCTRL_EnableInternalOSC32K();
     GCLK_Reset();
     SYSCTRL_ConfigureOSC8M();
@@ -41,15 +39,18 @@ void Initialize(void) {
     SCH_Init();
 
     GCLK_SelectGenerator(GCLK_CLKCTRL_ID_TCC0_TCC1_Val, GCLK_GEN4);
+    // TODO: move this to HAL library
     PM_REGS->PM_APBCMASK |= PM_APBCMASK_TCC0_Msk;
     TCC_Reset(TCC0);
     TCC_SetupTrigger(TCC0, 1000);   // 1000us = 1ms period
     TCC_Enable(TCC0);
 
-    // Enable interrupts
     NVIC_Initialize();
 }
 
 void TCC0_Interrupt(void) {
     SCH_Trigger();
 }
+
+// TODO: handle hardfault, sysfault
+// dummy handlers should set boot_state to error
