@@ -71,6 +71,7 @@ void _fatal() {
 }
 
 void BOOT_Initialize(void) {
+    // TODO: replace with HAL api call
     NVMCTRL_REGS->NVMCTRL_CTRLB = NVMCTRL_CTRLB_RWS_HALF;
     //NVMCTRL_SetReadWaitStates(NVMCTRL_CTRLB_RWS_HALF_Val);
 

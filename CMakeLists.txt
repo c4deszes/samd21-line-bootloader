@@ -4,14 +4,14 @@ project(
     samd21-line-bootloader
     DESCRIPTION "Bootloader for SAMD21 devices over LINE protocol"
     LANGUAGES C CXX ASM
-    VERSION 0.1.0)
+    VERSION 0.2.0)
 
 option(SAMD21_LINE_BL_BUILD_TESTS "Enables library test cases" OFF)
 
 find_package(Python REQUIRED)
 
 include(tools/cmake/CPM.cmake)
-CPMAddPackage("gh:c4deszes/samd21-hal#master")
+CPMAddPackage("gh:c4deszes/samd21-hal#feature/tcc-improvements")
 CPMAddPackage("gh:c4deszes/bike-flash-tool#master")
 
 # Documentation
