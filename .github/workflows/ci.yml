@@ -12,13 +12,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: python -m pip install -r tools/requirements.txt
+
       - name: Configure
         run: cmake --preset=armgcc-debug-unix .
 
       - name: Build
         run: cmake --build --preset=build-app-armgcc-debug-unix
 
-      # TODO: archive build
       - name: Archive documentation
         uses: actions/upload-artifact@v4
         with:
