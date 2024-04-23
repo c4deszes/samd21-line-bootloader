@@ -11,8 +11,8 @@ option(SAMD21_LINE_BL_BUILD_TESTS "Enables library test cases" OFF)
 find_package(Python REQUIRED)
 
 include(tools/cmake/CPM.cmake)
-CPMAddPackage("gh:c4deszes/samd21-hal#feature/tcc-improvements")
-CPMAddPackage("gh:c4deszes/bike-flash-tool#master")
+CPMAddPackage("gh:c4deszes/samd21-hal@0.2.0")
+CPMAddPackage("gh:c4deszes/bike-flash-tool@0.1.0")
 
 # Documentation
 #add_subdirectory(docs)
