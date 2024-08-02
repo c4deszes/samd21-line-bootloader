@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     bootheader.append(tx_pin[0])    # PORT
     bootheader.append(tx_pin[1])    # PIN
-    bootheader.append(tx_conf[1])   # PAD
+    bootheader.append(0 if tx_conf[1] == 0 else 1)   # PAD
 
     bootheader.append(rx_pin[0])    # PORT
     bootheader.append(rx_pin[1])    # PIN
