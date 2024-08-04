@@ -56,6 +56,5 @@ uint8_t FLASH_BL_GetWriteStatus(void) {
 }
 
 void FLASH_BL_ExitBoot(void) {
-    // TODO: implement
     BOOT_TryEnterApplication();
 }

@@ -45,8 +45,11 @@ static bool BOOT_AppCheckCrc(void) {
     return (calculated_approm_crc == bootHeaderData.fields.app_rom_crc);
 }
 
+/*
+ * Enters the application by setting up the stack pointer, vector table and then jump
+ */
 static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
-    // TODO: Disable WDT before
+    // TODO: Disable WDT before or extend window
 
     boot_entry_key = 0ULL;
     uint32_t app_start = bootHeaderData.fields.app_start + 4UL;
@@ -64,6 +67,14 @@ static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     application_code_entry();
 
     while(1);
+}
+
+/*
+ * Enters the application by clearing the boot entry decision flag and then self resetting
+ */
+void BOOT_TryEnterApplication(void) {
+    boot_entry_key = 0ULL;
+    NVIC_SystemReset();
 }
 
 void _fatal() {
@@ -92,7 +103,6 @@ void BOOT_Initialize(void) {
         boot_state = boot_state_header_error;
     }
     else if (BOOTHEADER_IsValid() && boot_entry_key != BOOT_ENTRY_MAGIC) {
-        // TODO: could call tryEnterApp here
         if (BOOT_AppCheckCrc()) {
             BOOT_EnterApplication();
         }
@@ -107,11 +117,6 @@ void BOOT_Initialize(void) {
 
 boot_state_t BOOT_GetState(void) {
     return boot_state;
-}
-
-void BOOT_TryEnterApplication(void) {
-    boot_entry_key = 0ULL;
-    NVIC_SystemReset();
 }
 
 static uint32_t phantomISR = 9999;

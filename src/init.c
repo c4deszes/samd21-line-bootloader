@@ -51,6 +51,3 @@ void Initialize(void) {
 void TCC0_Interrupt(void) {
     SCH_Trigger();
 }
-
-// TODO: handle hardfault, sysfault
-// dummy handlers should set boot_state to error
