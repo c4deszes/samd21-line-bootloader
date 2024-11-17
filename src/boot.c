@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "atsamd21e18a.h"
+#include "sam.h"
 
 // TODO: for some reason these values are incorrect
 extern uint32_t __bootrom_start;
@@ -47,6 +47,7 @@ static bool BOOT_AppCheckCrc(void) {
 
 /*
  * Enters the application by setting up the stack pointer, vector table and then jump
+ * Should only be called after a full reset so the application doesn't have to reset peripherals
  */
 static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     // TODO: Disable WDT before or extend window
@@ -57,7 +58,6 @@ static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     void (*application_code_entry)(void);
     application_code_entry = (void (*)(void))(unsigned *)(*(unsigned *)(app_start));
 
-    // TODO: disable interrupts
     __disable_irq();
     __DMB();
 
@@ -82,16 +82,13 @@ void _fatal() {
 }
 
 void BOOT_Initialize(void) {
-    // TODO: replace with HAL api call
-    NVMCTRL_REGS->NVMCTRL_CTRLB = NVMCTRL_CTRLB_RWS_HALF;
-    //NVMCTRL_SetReadWaitStates(NVMCTRL_CTRLB_RWS_HALF_Val);
+    NVMCTRL_SetReadWaitStates(NVMCTRL_CTRLB_RWS_HALF_Val);
 
     boot_state = boot_state_init;
 
     // TODO: use addresses from linkerscript
     calculated_bootrom_crc = DSU_CalculateCRC32(0xFFFFFFFFUL, 0x0000UL, 0x2000UL - 4);
 
-    // TODO: if the CRC is wrong then halt here
     if (calculated_bootrom_crc != bootrom_crc) {
          boot_state = boot_state_rom_error;
         _fatal();

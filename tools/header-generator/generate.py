@@ -2,13 +2,54 @@ import argparse
 import intelhex
 import json
 
+SERCOM0 = 0
+SERCOM1 = 1
+SERCOM2 = 2
+SERCOM3 = 3
+
+SERCOM_MUX_C = 2
+SERCOM_MUX_D = 3
+
 SERCOM_MAPPING = {
-            # SERCOM, PAD
-    "PA08": (0, 0),
-    "PA09": (0, 1),
-    # TODO: add the rest
-    "PA24": (3, 2),
-    "PA25": (3, 3)
+    "PA00_ALT": (SERCOM1, 0, SERCOM_MUX_D),
+    "PA01_ALT": (SERCOM1, 1, SERCOM_MUX_D),
+
+    "PA04_ALT": (SERCOM0, 0, SERCOM_MUX_D),
+    "PA05_ALT": (SERCOM0, 1, SERCOM_MUX_D),
+    "PA06_ALT": (SERCOM0, 2, SERCOM_MUX_D),
+    "PA07_ALT": (SERCOM0, 3, SERCOM_MUX_D),
+
+    "PA08": (SERCOM0, 0, SERCOM_MUX_C),
+    "PA09": (SERCOM0, 1, SERCOM_MUX_C),
+    "PA10": (SERCOM0, 2, SERCOM_MUX_C),
+    "PA11": (SERCOM0, 3, SERCOM_MUX_C),
+
+    "PA08_ALT": (SERCOM2, 0, SERCOM_MUX_D),
+    "PA09_ALT": (SERCOM2, 1, SERCOM_MUX_D),
+    "PA10_ALT": (SERCOM2, 2, SERCOM_MUX_D),
+    "PA11_ALT": (SERCOM2, 3, SERCOM_MUX_D),
+
+    "PA12": (SERCOM2, 0, SERCOM_MUX_C),
+    "PA13": (SERCOM2, 1, SERCOM_MUX_C),
+    "PA14": (SERCOM2, 2, SERCOM_MUX_C),
+    "PA15": (SERCOM2, 3, SERCOM_MUX_C),
+    # PA12, PA13, PA14, PA15 ALT only available on SAMD21G/J (SERCOM4)
+
+    "PA16": (SERCOM1, 0, SERCOM_MUX_C),
+    "PA17": (SERCOM1, 1, SERCOM_MUX_C),
+    "PA18": (SERCOM1, 2, SERCOM_MUX_C),
+    "PA19": (SERCOM1, 3, SERCOM_MUX_C),
+
+    "PA16_ALT": (SERCOM3, 0, SERCOM_MUX_D),
+    "PA17_ALT": (SERCOM3, 1, SERCOM_MUX_D),
+    "PA18_ALT": (SERCOM3, 2, SERCOM_MUX_D),
+    "PA19_ALT": (SERCOM3, 3, SERCOM_MUX_D),
+
+    "PA22": (SERCOM3, 0, SERCOM_MUX_C),
+    "PA23": (SERCOM3, 1, SERCOM_MUX_C),
+    "PA24": (SERCOM3, 2, SERCOM_MUX_C),
+    "PA25": (SERCOM3, 3, SERCOM_MUX_C)
+    # PA22, PA23, PA24, PA25 ALT only available on SAMD21G/J (SERCOM5)
 }
 
 def crc32(msg):
@@ -21,7 +62,7 @@ def crc32(msg):
 
 def get_pin_settings(pin: str):
     if pin[1] == 'A':
-        return (0, int(pin[2:], base=10))
+        return (0, int(pin[2:pin.find('_')], base=10))
     raise ValueError('Invalid pin.')
 
 if __name__ == '__main__':
@@ -65,21 +106,26 @@ if __name__ == '__main__':
 
     if tx_conf[0] != rx_conf[0]:
         raise ValueError('TX and RX pins dont use the same SERCOM peripheral')
+    
+    if tx_conf[1] == rx_conf[1]:
+        raise ValueError('TX and RX pads cant be the same.')
 
     if tx_conf[1] != 0 and tx_conf[1] != 2:
         raise ValueError('TX pad must be 0 or 2.')
     
-    bootheader.append(tx_conf[0])
-    bootheader.append(int(config['baudrate'] / 4800))
-    bootheader.append(1 if config['oneWire'] else 0)
+    bootheader.append(tx_conf[0])      # SERCOM
+    bootheader.append(int(config['baudrate'] / 4800)) # BAUDRATE
+    bootheader.append(1 if config['oneWire'] else 0) # ONEWIRE
 
     bootheader.append(tx_pin[0])    # PORT
     bootheader.append(tx_pin[1])    # PIN
     bootheader.append(0 if tx_conf[1] == 0 else 1)   # PAD
+    bootheader.append(rx_conf[2])   # MUX
 
     bootheader.append(rx_pin[0])    # PORT
     bootheader.append(rx_pin[1])    # PIN
     bootheader.append(rx_conf[1])   # PAD
+    bootheader.append(rx_conf[2])   # MUX
 
     txe_pin = get_pin_settings(config['txePin']) if config['txePin'] else (0xFF, 0xFF)
     bootheader.append(txe_pin[0])

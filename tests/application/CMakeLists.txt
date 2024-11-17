@@ -1,3 +1,5 @@
+samx21_hal(hal-test-library ATSAMD21E18A)
+
 add_executable(
     application
     EXCLUDE_FROM_ALL
@@ -7,11 +9,7 @@ add_executable(
     tasks.c
 )
 target_include_directories(application PRIVATE include ${BL_GENCODE_DIR})
-target_link_libraries(application PRIVATE cmsis
-                                         atsamd21e18a-dfp
-                                         samd21-hal-api
-                                         samd21-hal-sources
-                                         samd21-hal-options
+target_link_libraries(application PRIVATE hal-test-library
                                          line-protocol-api line-protocol-sources
                                          line-protocol-adapter-sources
                                          flash-line-api flash-line-sources

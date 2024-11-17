@@ -26,10 +26,12 @@ typedef union {
         uint8_t sercom_tx_port;
         uint8_t sercom_tx_pin;
         uint8_t sercom_tx_pad;
+        uint8_t sercom_tx_mux;
 
         uint8_t sercom_rx_port;
         uint8_t sercom_rx_pin;
         uint8_t sercom_rx_pad;
+        uint8_t sercom_rx_mux;
 
         uint8_t sercom_txe_port;
         uint8_t sercom_txe_pin;

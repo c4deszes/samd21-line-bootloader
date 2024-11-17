@@ -79,7 +79,7 @@ SECTIONS
     PROVIDE_HIDDEN (__exidx_end = .);
 
     . = ALIGN(4);
-    __etext = .;
+    _etext = .;
 
     .data :
 	{
@@ -115,6 +115,16 @@ SECTIONS
         _data_sizeof = SIZEOF(.data);
 	} > ram AT > app_rom
 
+    .relocate : AT (_etext)
+    {
+        . = ALIGN(4);
+        _srelocate = .;
+        *(.ramfunc .ramfunc.*);
+        *(.data .data.*);
+        . = ALIGN(4);
+        _erelocate = .;
+    } > ram
+
     .app_rom_fill : {
         FILL(0xFFFFFFFF);
         . = ORIGIN(app_rom) + LENGTH(app_rom) - 4;
@@ -131,14 +141,18 @@ SECTIONS
      *  The best-fit allocator locates them, so that they may flow
      *  around absolute sections as needed.
      */
-    .bss :
+    .bss (NOLOAD) :
 	{
 		. = ALIGN(4);
+        _sbss = . ;
+        _szero = .;
 		__bss_start__ = .;
 		*(.bss*)
 		*(COMMON)
 		. = ALIGN(4);
 		__bss_end__ = .;
+        _ebss = . ;
+        _ezero = .;
 	} > ram
 
     .bl_shared_ram (NOLOAD) :
