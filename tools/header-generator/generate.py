@@ -62,7 +62,7 @@ def crc32(msg):
 
 def get_pin_settings(pin: str):
     if pin[1] == 'A':
-        return (0, int(pin[2:pin.find('_')], base=10))
+        return (0, int(pin[2:4], base=10))
     raise ValueError('Invalid pin.')
 
 if __name__ == '__main__':
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     bootheader.append(tx_pin[0])    # PORT
     bootheader.append(tx_pin[1])    # PIN
     bootheader.append(0 if tx_conf[1] == 0 else 1)   # PAD
-    bootheader.append(rx_conf[2])   # MUX
+    bootheader.append(tx_conf[2])   # MUX
 
     bootheader.append(rx_pin[0])    # PORT
     bootheader.append(rx_pin[1])    # PIN
