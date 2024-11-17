@@ -49,6 +49,7 @@ target_link_libraries(bootloader PRIVATE hal-library
                                          bootloader-api
 )
 set_target_properties(bootloader PROPERTIES SUFFIX ".elf")
+set_target_properties(bootloader PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ld/bootloader.ld;${CMAKE_CURRENT_SOURCE_DIR}/ld/memory.ld")
 target_link_options(bootloader PRIVATE -Tbootloader.ld)
 target_link_options(bootloader PRIVATE -Wl,-Map=bootloader.map -Wl,--gc-sections)
 

@@ -81,40 +81,6 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;
 
-    .data :
-	{
-		__data_start__ = .;
-		*(vtable)
-		*(.data*)
-
-		. = ALIGN(4);
-		/* preinit data */
-		PROVIDE_HIDDEN (__preinit_array_start = .);
-		KEEP(*(.preinit_array))
-		PROVIDE_HIDDEN (__preinit_array_end = .);
-
-		. = ALIGN(4);
-		/* init data */
-		PROVIDE_HIDDEN (__init_array_start = .);
-		KEEP(*(SORT(.init_array.*)))
-		KEEP(*(.init_array))
-		PROVIDE_HIDDEN (__init_array_end = .);
-
-
-		. = ALIGN(4);
-		/* finit data */
-		PROVIDE_HIDDEN (__fini_array_start = .);
-		KEEP(*(SORT(.fini_array.*)))
-		KEEP(*(.fini_array))
-		PROVIDE_HIDDEN (__fini_array_end = .);
-
-		KEEP(*(.jcr*))
-		. = ALIGN(16);
-		/* All data end */
-		__data_end__ = .;
-        _data_sizeof = SIZEOF(.data);
-	} > ram AT > app_rom
-
     .relocate : AT (_etext)
     {
         . = ALIGN(4);
@@ -125,7 +91,7 @@ SECTIONS
         _erelocate = .;
     } > ram
 
-    .app_rom_fill : {
+    .app_rom_fill : AT (_etext + SIZEOF(.relocate)) {
         FILL(0xFFFFFFFF);
         . = ORIGIN(app_rom) + LENGTH(app_rom) - 4;
         __approm_end = .;
