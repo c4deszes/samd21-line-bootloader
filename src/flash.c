@@ -10,8 +10,6 @@ fl_BootSignature_t* FLASH_BL_ReadSignature(void);
 uint8_t page_write_status = FLASH_LINE_PAGE_NOT_WRITTEN;
 
 void FLASH_BL_OnPageWrite(uint32_t address, uint8_t size, uint8_t* data) {
-    // Queue page write
-
     // TODO: if page is invalid
     if (size != 64) {
         page_write_status = FLASH_LINE_PAGE_ADDRESS_ERROR;

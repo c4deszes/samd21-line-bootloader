@@ -11,11 +11,14 @@ option(SAMD21_LINE_BL_BUILD_TESTS "Enables library test cases" OFF)
 find_package(Python REQUIRED)
 
 include(tools/cmake/CPM.cmake)
-CPMAddPackage("gh:c4deszes/samd21-hal@0.2.0")
+CPMAddPackage("gh:c4deszes/bike-line-protocol@0.1.0")
+CPMAddPackage("gh:c4deszes/samd21-hal@0.3.0")
 CPMAddPackage("gh:c4deszes/bike-flash-tool@0.1.0")
 
 # Documentation
 #add_subdirectory(docs)
+
+samx21_hal(hal-library ATSAMD21E18A)
 
 set(BL_GENCODE_DIR ${CMAKE_CURRENT_BINARY_DIR}/gencode)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/metainfo.h.in
@@ -39,17 +42,14 @@ add_executable(
     src/tasks.c
 )
 target_include_directories(bootloader PRIVATE include ${BL_GENCODE_DIR})
-target_link_libraries(bootloader PRIVATE cmsis
-                                         atsamd21e18a-dfp
-                                         samd21-hal-api
-                                         samd21-hal-sources
-                                         samd21-hal-options
+target_link_libraries(bootloader PRIVATE hal-library
                                          line-protocol-api line-protocol-sources
                                          line-protocol-adapter-sources
                                          flash-line-api flash-line-sources
                                          bootloader-api
 )
 set_target_properties(bootloader PROPERTIES SUFFIX ".elf")
+set_target_properties(bootloader PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ld/bootloader.ld;${CMAKE_CURRENT_SOURCE_DIR}/ld/memory.ld")
 target_link_options(bootloader PRIVATE -Tbootloader.ld)
 target_link_options(bootloader PRIVATE -Wl,-Map=bootloader.map -Wl,--gc-sections)
 

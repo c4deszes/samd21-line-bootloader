@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 
-#include "atsamd21e18a.h"
+#include "sam.h"
 
 #include "line_protocol.h"
 #include "flash_line_api.h"

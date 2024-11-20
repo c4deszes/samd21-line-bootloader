@@ -11,7 +11,7 @@
 #include "hal/gclk.h"
 #include "common/ringbuffer.h"
 
-#include "atsamd21e18a.h"
+#include "sam.h"
 
 RINGBUFFER_8(COMM_UsartBufferTx, 128);
 RINGBUFFER_8(COMM_UsartBufferRx, 128);
@@ -22,9 +22,11 @@ static bool comm_onewire;
 static uint8_t comm_tx_port;
 static uint8_t comm_tx_pin;
 static uint8_t comm_tx_pad;
+static uint8_t comm_tx_mux;
 static uint8_t comm_rx_port;
 static uint8_t comm_rx_pin;
 static uint8_t comm_rx_pad;
+static uint8_t comm_rx_mux;
 static uint8_t comm_cs_port;
 static uint8_t comm_cs_pin;
 
@@ -35,9 +37,11 @@ static void COMM_LoadDefaults(void) {
     comm_tx_port = COMM_DEFAULT_TX_PORT;
     comm_tx_pin = COMM_DEFAULT_TX_PIN;
     comm_tx_pad = COMM_DEFAULT_TX_PAD;
+    comm_tx_mux = COMM_DEFAULT_TX_MUX;
     comm_rx_port = COMM_DEFAULT_RX_PORT;
     comm_rx_pin = COMM_DEFAULT_RX_PIN;
     comm_rx_pad = COMM_DEFAULT_RX_PAD;
+    comm_rx_mux = COMM_DEFAULT_RX_MUX;
     comm_cs_port = COMM_DEFAULT_CS_PORT;
     comm_cs_pin = COMM_DEFAULT_CS_PIN;
 }
@@ -49,6 +53,8 @@ static void COMM_LoadConfig(void) {
             bootHeaderData.fields.sercom_rx_port == PORT_GROUP_A &&
             bootHeaderData.fields.sercom_tx_pin <= 31 &&
             bootHeaderData.fields.sercom_rx_pin <= 31 &&
+            (bootHeaderData.fields.sercom_tx_mux == PORT_PMUX_PMUXE_C_Val || bootHeaderData.fields.sercom_tx_mux == PORT_PMUX_PMUXE_D_Val) &&
+            (bootHeaderData.fields.sercom_rx_mux == PORT_PMUX_PMUXE_C_Val || bootHeaderData.fields.sercom_rx_mux == PORT_PMUX_PMUXE_D_Val) &&
             bootHeaderData.fields.sercom_tx_pad <= SERCOM_USART_TX_PAD2 &&
             bootHeaderData.fields.sercom_rx_pad <= SERCOM_USART_RX_PAD3 &&
             bootHeaderData.fields.sercom_baudrate >= 1 && bootHeaderData.fields.sercom_baudrate <= 24) {
@@ -59,9 +65,11 @@ static void COMM_LoadConfig(void) {
             comm_tx_port = bootHeaderData.fields.sercom_tx_port;
             comm_tx_pin = bootHeaderData.fields.sercom_tx_pin;
             comm_tx_pad = bootHeaderData.fields.sercom_tx_pad;
+            comm_tx_mux = bootHeaderData.fields.sercom_tx_mux;
             comm_rx_port = bootHeaderData.fields.sercom_rx_port;
             comm_rx_pin = bootHeaderData.fields.sercom_rx_pin;
             comm_rx_pad = bootHeaderData.fields.sercom_rx_pad;
+            comm_rx_mux = bootHeaderData.fields.sercom_rx_mux;
 
             if (bootHeaderData.fields.sercom_cs_port == PORT_GROUP_A &&
                 bootHeaderData.fields.sercom_cs_pin <= 31) {
@@ -101,8 +109,8 @@ static uint32_t sercom_pm_mask(uint8_t sercom) {
 void COMM_Initialize(void) {
     COMM_LoadConfig();
 
-    GPIO_EnableFunction(comm_tx_port, comm_tx_pin, PORT_PMUX_PMUXE_C_Val);
-    GPIO_EnableFunction(comm_rx_port, comm_rx_pin, PORT_PMUX_PMUXE_C_Val);
+    GPIO_EnableFunction(comm_tx_port, comm_tx_pin, comm_tx_mux);
+    GPIO_EnableFunction(comm_rx_port, comm_rx_pin, comm_rx_mux);
 
     // TODO: txe pin support
     if (comm_cs_port == PORT_GROUP_A &&
@@ -172,4 +180,8 @@ void LINE_Transport_WriteResponse(uint8_t size, uint8_t* payload, uint8_t checks
     SERCOM_USART_WriteData(comm_sercom, payload+1, size-1);
     SERCOM_USART_WriteData(comm_sercom, &checksum, sizeof(uint8_t));
     SERCOM_USART_FlushOutput(comm_sercom);
+}
+
+void LINE_Transport_WriteRequest(uint16_t request) {
+    // do nothing
 }

@@ -49,15 +49,15 @@ configuration may revert to defaults.
       - Revert to two-wire mode
       - Two wire mode
 
-    * - TX port/pin/pad
+    * - TX port/pin/pad/mux
       - Serial transmit pin settings
       - Revert all pin settings to default
-      - PA24, Pad2
+      - PA24, Pad2 (function C)
 
-    * - RX port/pin/pad
+    * - RX port/pin/pad/mux
       - Serial receive pin settings
       - Revert all pin settings to default
-      - PA25, Pad3
+      - PA25, Pad3 (function C)
 
     * - TXE port/pin
       - Transmit enable pin, drives this pin high when transmitting

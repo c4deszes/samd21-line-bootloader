@@ -51,7 +51,9 @@ a header from a configuration file, this header can then be merged into the appl
             -o ${CMAKE_CURRENT_BINARY_DIR}/application.hex -intel
     )
 
-To use the header generation a file such as the one below needs to be created.
+To use the header generation a file such as the one below needs to be created. Using SERCOM-ALT pins
+is possible by using `PA04_ALT` for example, the script will throw an error if the pin configuration
+is not valid (e.g.: different SERCOMx used, wrong TX pin)
 
 .. code-block:: json
 

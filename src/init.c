@@ -15,7 +15,7 @@
 #include "common/scheduler.h"
 
 // TODO: remove this once direct register access is removed
-#include "atsamd21e18a.h"
+#include "sam.h"
 
 void Initialize(void) {
     // TODO: enable watchdog

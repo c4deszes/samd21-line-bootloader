@@ -7,7 +7,7 @@
 #include "flash_line_api.h"
 #include "common/swtimer.h"
 
-#include "atsamd21e18a.h"
+#include "sam.h"
 
 static LINE_Diag_SoftwareVersion_t sw_version = {
     .major = 1,
@@ -21,6 +21,10 @@ uint8_t LINE_Diag_GetOperationStatus(void) {
 
 uint32_t LINE_Diag_GetSerialNumber(void) {
     return DSU_GetSerialNumber32();
+}
+
+void LINE_Transport_WriteRequest(uint16_t request) {
+    // do nothing
 }
 
 LINE_Diag_SoftwareVersion_t* LINE_Diag_GetSoftwareVersion(void) {
