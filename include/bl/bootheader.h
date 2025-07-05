@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #define BOOTHEADER_VERSION_V1 1
 
@@ -42,6 +43,8 @@ typedef union {
     uint8_t data[252];
 } bl_BootHeader_t;
 
+static_assert(sizeof(bl_BootHeader_t) == 252, "Boot header size must be 252 bytes");
+
 extern bl_BootHeader_t bootHeaderData;
 
 /**
@@ -50,11 +53,9 @@ extern bl_BootHeader_t bootHeaderData;
 void BOOTHEADER_Load(void);
 
 /**
- * @brief Returns true if the bootheader can be considered valid, all operations where the
- *        bootheader is accessed should be preceeded by this check
+ * @brief Checks if the bootheader is valid.
  * 
- * @return true Bootheader is correct
- * @return false Bootheader is invalid
+ * @return true if the bootheader is valid, false otherwise.
  */
 bool BOOTHEADER_IsValid(void);
 

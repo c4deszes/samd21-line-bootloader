@@ -4,29 +4,50 @@ project(
     samd21-line-bootloader
     DESCRIPTION "Bootloader for SAMD21 devices over LINE protocol"
     LANGUAGES C CXX ASM
-    VERSION 0.2.0)
+    VERSION 0.3.0)
 
+################################################################################
+# Options
+################################################################################
+option(SAMD21_LINE_BL_BUILD_BINARY "Enables building the bootloader" OFF)
 option(SAMD21_LINE_BL_BUILD_TESTS "Enables library test cases" OFF)
+option(SAMD21_LINE_BL_BUILD_DOCS "Enables documentation generation" OFF)
 
 find_package(Python REQUIRED)
 
+################################################################################
+# Dependencies
+################################################################################
 include(tools/cmake/CPM.cmake)
-CPMAddPackage("gh:c4deszes/bike-line-protocol@0.1.0")
-CPMAddPackage("gh:c4deszes/samd21-hal@0.3.0")
-CPMAddPackage("gh:c4deszes/bike-flash-tool@0.1.0")
+CPMAddPackage("gh:c4deszes/bike-line-protocol@0.3.0")
+CPMAddPackage("gh:c4deszes/samd21-hal#feature/new-peripherals2")
+CPMAddPackage("gh:c4deszes/bike-flash-tool#feature/line-lib-update")
 
-# Documentation
-#add_subdirectory(docs)
+################################################################################
+# Interface
+################################################################################
+add_library(bootloader-api INTERFACE)
+target_sources(bootloader-api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/key.c)
+target_include_directories(bootloader-api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/api)
+target_link_directories(bootloader-api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ld)
 
-samx21_hal(hal-library ATSAMD21E18A)
+################################################################################
+# Sources
+################################################################################
+if (SAMD21_LINE_BL_BUILD_BINARY)
+
+execute_process(
+    COMMAND git rev-parse HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_SHA
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 set(BL_GENCODE_DIR ${CMAKE_CURRENT_BINARY_DIR}/gencode)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/metainfo.h.in
                ${BL_GENCODE_DIR}/metainfo.h)
 
-add_library(bootloader-api INTERFACE)
-target_include_directories(bootloader-api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/api)
-target_link_directories(bootloader-api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ld)
+samx21_hal(hal-library ATSAMD21E18A)
 
 add_executable(
     bootloader
@@ -35,7 +56,6 @@ add_executable(
     src/boot.c
     src/bootheader.c
     src/comm.c
-    src/diag.c
     src/flash.c
     src/init.c
     src/main.c
@@ -53,18 +73,28 @@ set_target_properties(bootloader PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE
 target_link_options(bootloader PRIVATE -Tbootloader.ld)
 target_link_options(bootloader PRIVATE -Wl,-Map=bootloader.map -Wl,--gc-sections)
 
-hexify(TARGET bootloader
-       HEX ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex)
+hexify(
+    TARGET bootloader
+    HEX ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex)
+dump_symbols(bootloader ${CMAKE_CURRENT_BINARY_DIR}/bootloader.lss)
+dump_size(bootloader)
+
 add_custom_target(bootloader-crc
-    COMMAND srec_cat ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex --intel -crop 0x0000 0x1FFC
-            -CRC32_Little_endian 0x1FFC --CCITT -o ${CMAKE_CURRENT_BINARY_DIR}/bootloader_with_crc.hex --intel
+    COMMAND srec_cat ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex --intel -crop 0x0000 0x2FFC
+            -CRC32_Little_endian 0x2FFC --CCITT -o ${CMAKE_CURRENT_BINARY_DIR}/bootloader_with_crc.hex --intel
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/bootloader_with_crc.hex
 )
 
-dump_symbols(bootloader ${CMAKE_CURRENT_BINARY_DIR}/bootloader.lss)
-dump_size(bootloader)
+add_custom_target(bootloader-full
+    DEPENDS bootloader-hex bootloader-crc bootloader-lss bootloader-memory
+)
 
+endif()
+
+################################################################################
+# Functions
+################################################################################
 function(bootloader_header)
 cmake_parse_arguments(
     ""
@@ -95,10 +125,16 @@ cmake_parse_arguments(
     endif()
 endfunction()
 
-add_custom_target(bootloader-full
-    DEPENDS bootloader-hex bootloader-crc bootloader-lss bootloader-memory
-)
-
+################################################################################
+# Testing
+################################################################################
 if(SAMD21_LINE_BL_BUILD_TESTS)
     add_subdirectory(tests/application)
+endif()
+
+################################################################################
+# Documentation
+################################################################################
+if (SAMD21_LINE_BL_BUILD_DOCS)
+    add_subdirectory(docs)
 endif()

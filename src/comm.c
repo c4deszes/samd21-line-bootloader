@@ -11,7 +11,15 @@
 #include "hal/gclk.h"
 #include "common/ringbuffer.h"
 
+#include "bl/boot.h"
+#include "hal/dsu.h"
+#include "metainfo.h"
+#include <stdlib.h>
+
 #include "sam.h"
+
+#define BOOT_TRANSPORT_CHANNEL 0
+#define BOOT_DIAG_CHANNEL 0
 
 RINGBUFFER_8(COMM_UsartBufferTx, 128);
 RINGBUFFER_8(COMM_UsartBufferRx, 128);
@@ -106,6 +114,42 @@ static uint32_t sercom_pm_mask(uint8_t sercom) {
     return 0;
 }
 
+uint8_t LINE_Diag_GetOperationStatus(void) {
+    boot_state_t state = BOOT_GetState();
+    if (state == boot_state_init) {
+        return LINE_DIAG_OP_STATUS_INIT;
+    }
+    if (state == boot_state_rom_error || state == boot_state_header_error || state == boot_state_app_error) {
+        return LINE_DIAG_OP_STATUS_BOOT_ERROR;
+    }
+    return LINE_DIAG_OP_STATUS_BOOT;
+}
+
+static LINE_Diag_SoftwareVersion_t sw_version = {
+    .major = BL_SW_MAJOR,
+    .minor = BL_SW_MINOR,
+    .patch = BL_SW_PATCH
+};
+
+LINE_Diag_SoftwareVersion_t* LINE_Diag_GetSoftwareVersion(void) {
+    return &sw_version;
+}
+
+static LINE_Diag_Config_t LINE_DiagConfig = {
+    .transport_channel = BOOT_TRANSPORT_CHANNEL,
+    .address = LINE_DIAG_UNICAST_UNASSIGNED_ID,
+
+    .on_wakeup = NULL,
+    .on_idle = NULL,            // TODO: implement idle state handling
+    .on_shutdown = NULL,        // TODO: implement shutdown state handling
+    .on_conditional_change_address = NULL,
+
+    .op_status = LINE_Diag_GetOperationStatus,
+    .power_status = NULL,
+    .serial_number = DSU_GetSerialNumber32,
+    .software_version = LINE_Diag_GetSoftwareVersion,
+};
+
 void COMM_Initialize(void) {
     COMM_LoadConfig();
 
@@ -113,6 +157,7 @@ void COMM_Initialize(void) {
     GPIO_EnableFunction(comm_rx_port, comm_rx_pin, comm_rx_mux);
 
     // TODO: txe pin support
+
     if (comm_cs_port == PORT_GROUP_A &&
         comm_cs_pin <= 31) {
         
@@ -138,11 +183,48 @@ void COMM_Initialize(void) {
     );
     SERCOM_USART_Enable(comm_sercom);
 
-    LINE_Transport_Init(comm_onewire);
-    LINE_App_Init();
-    FLASH_LINE_Init(FLASH_LINE_BOOTLOADER_MODE);
+    LINE_Transport_Init(BOOT_TRANSPORT_CHANNEL, comm_onewire);
+    LINE_Diag_Init(BOOT_DIAG_CHANNEL, &LINE_DiagConfig);
+    FLASH_LINE_Init(BOOT_DIAG_CHANNEL, FLASH_LINE_BOOTLOADER_MODE);
 }
 
+void COMM_Update(void) {
+    uint8_t length = SERCOM_USART_Available(comm_sercom);
+    while (length > 0) {
+        uint8_t data = SERCOM_USART_Read(comm_sercom);
+        LINE_Transport_Receive(BOOT_TRANSPORT_CHANNEL, data);
+        length--;
+    }
+
+    LINE_Transport_Update(BOOT_TRANSPORT_CHANNEL, 1);
+}
+
+void LINE_Transport_WriteResponse(uint8_t channel, uint8_t size, uint8_t* payload, uint8_t checksum) {
+    const uint8_t fix = 69;
+    SERCOM_USART_WriteData(comm_sercom, &size, sizeof(uint8_t));
+    // TODO: fix for skipped 3rd byte
+    SERCOM_USART_WriteData(comm_sercom, payload, 1);
+    SERCOM_USART_WriteData(comm_sercom, &fix, 1);
+    SERCOM_USART_WriteData(comm_sercom, payload+1, size-1);
+    SERCOM_USART_WriteData(comm_sercom, &checksum, sizeof(uint8_t));
+    SERCOM_USART_FlushOutput(comm_sercom);
+}
+
+/// LINE Application Layer
+
+void LINE_App_OnRequest(uint8_t channel, uint16_t request, uint8_t size, uint8_t* payload) {
+    LINE_Diag_OnRequest(channel, request, size, payload);
+}
+
+bool LINE_App_RespondsTo(uint8_t channel, uint16_t request) {
+    return LINE_Diag_RespondsTo(channel, request);
+}
+
+bool LINE_App_PrepareResponse(uint8_t channel, uint16_t request, uint8_t* size, uint8_t* payload) {
+    return LINE_Diag_PrepareResponse(channel, request, size, payload);
+}
+
+/// SERCOM USART Interrupt Handlers
 
 void SERCOM0_Interrupt(void) {
     SERCOM_USART_InterruptHandler(SERCOM0);
@@ -158,30 +240,4 @@ void SERCOM2_Interrupt(void) {
 
 void SERCOM3_Interrupt(void) {
     SERCOM_USART_InterruptHandler(SERCOM3);
-}
-
-void COMM_Update(void) {
-    uint8_t length = SERCOM_USART_Available(comm_sercom);
-    while (length > 0) {
-        uint8_t data = SERCOM_USART_Read(comm_sercom);
-        LINE_Transport_Receive(data);
-        length--;
-    }
-
-    LINE_Transport_Update(1);
-}
-
-void LINE_Transport_WriteResponse(uint8_t size, uint8_t* payload, uint8_t checksum) {
-    const uint8_t fix = 69;
-    SERCOM_USART_WriteData(comm_sercom, &size, sizeof(uint8_t));
-    // TODO: fix for skipped 3rd byte
-    SERCOM_USART_WriteData(comm_sercom, payload, 1);
-    SERCOM_USART_WriteData(comm_sercom, &fix, 1);
-    SERCOM_USART_WriteData(comm_sercom, payload+1, size-1);
-    SERCOM_USART_WriteData(comm_sercom, &checksum, sizeof(uint8_t));
-    SERCOM_USART_FlushOutput(comm_sercom);
-}
-
-void LINE_Transport_WriteRequest(uint16_t request) {
-    // do nothing
 }
