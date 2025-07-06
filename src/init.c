@@ -3,6 +3,7 @@
 
 #include "bl/boot.h"
 #include "bl/bootheader.h"
+#include "bl/flash.h"
 
 #include "hal/gclk.h"
 #include "hal/pm.h"
@@ -13,9 +14,13 @@
 #include "hal/sysctrl.h"
 
 #include "common/scheduler.h"
+#include "metainfo.h"
 
 // TODO: remove this once direct register access is removed
 #include "sam.h"
+
+// TODO: prevent linker from removing this symbol
+static const char GIT_COMMIT_SHA[] __attribute__((used, section(".git_commit_sha"))) = BL_GIT_COMMIT;
 
 void Initialize(void) {
     // TODO: enable watchdog
@@ -34,6 +39,8 @@ void Initialize(void) {
 
     // Setup communication
     COMM_Initialize();
+
+    FLASH_Init();
 
     // Setup scheduler
     SCH_Init();

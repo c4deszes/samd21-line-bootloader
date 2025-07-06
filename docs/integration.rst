@@ -28,6 +28,9 @@ linkerscript.
     )
     target_link_libraries(application PRIVATE bootloader-api)
 
+Applications may choose to implement the key writing functionality themselves, to do that
+simply define ``BL_BOOT_ENTRY_API_DISABLED`` macro.
+
 An important aspect of this bootloader is the bootheader sector at the end of the memory, this
 tells the bootloader where the application is going to be and what settings it should use for
 serial communication. The library includes the `bootloader_header` function which will generate

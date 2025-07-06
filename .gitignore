@@ -1,3 +1,5 @@
 _build/
 .vscode/
 CMakeUserPresets.json
+
+__pycache__/

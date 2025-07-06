@@ -17,7 +17,6 @@ extern uint32_t __bootrom_start;
 extern uint32_t __bootrom_end;
 
 uint32_t bootrom_crc __attribute__((section(".bl_rom.crc")));
-uint64_t boot_entry_key __attribute__((section(".bl_shared_ram")));
 
 static boot_state_t boot_state;
 static uint32_t calculated_bootrom_crc;
@@ -36,6 +35,8 @@ static bool BOOT_AppCheckCrc(void) {
         return false;
     }
 
+    // TODO: app start address should be after bootloader, must also be aligned to row
+
     // TODO: check app minimum size
 
     calculated_approm_crc = DSU_CalculateCRC32(0xFFFFFFFFUL,
@@ -52,7 +53,7 @@ static bool BOOT_AppCheckCrc(void) {
 static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
     // TODO: Disable WDT before or extend window
 
-    boot_entry_key = 0ULL;
+    BL_ResetBootEntryKey();
     uint32_t app_start = bootHeaderData.fields.app_start + 4UL;
     uint32_t initial_stack_pointer = bootHeaderData.fields.app_start;
     void (*application_code_entry)(void);
@@ -73,7 +74,7 @@ static void __attribute__((noreturn)) BOOT_EnterApplication(void) {
  * Enters the application by clearing the boot entry decision flag and then self resetting
  */
 void BOOT_TryEnterApplication(void) {
-    boot_entry_key = 0ULL;
+    BL_ResetBootEntryKey();
     NVIC_SystemReset();
 }
 
@@ -87,7 +88,7 @@ void BOOT_Initialize(void) {
     boot_state = boot_state_init;
 
     // TODO: use addresses from linkerscript
-    calculated_bootrom_crc = DSU_CalculateCRC32(0xFFFFFFFFUL, 0x0000UL, 0x2000UL - 4);
+    calculated_bootrom_crc = DSU_CalculateCRC32(0xFFFFFFFFUL, 0x0000UL, 0x3000UL - 4);
 
     if (calculated_bootrom_crc != bootrom_crc) {
          boot_state = boot_state_rom_error;
@@ -99,7 +100,7 @@ void BOOT_Initialize(void) {
     if (!BOOTHEADER_IsValid()) {
         boot_state = boot_state_header_error;
     }
-    else if (BOOTHEADER_IsValid() && boot_entry_key != BOOT_ENTRY_MAGIC) {
+    else if (BOOTHEADER_IsValid() && !BL_IsBootEntryKeySet()) {
         if (BOOT_AppCheckCrc()) {
             BOOT_EnterApplication();
         }
@@ -107,7 +108,7 @@ void BOOT_Initialize(void) {
             boot_state = boot_state_app_error;
         }
     }
-    else if (BOOTHEADER_IsValid() && boot_entry_key == BOOT_ENTRY_MAGIC) {
+    else if (BOOTHEADER_IsValid() && BL_IsBootEntryKeySet()) {
         boot_state = boot_state_wait;
     }
 }
@@ -115,6 +116,8 @@ void BOOT_Initialize(void) {
 boot_state_t BOOT_GetState(void) {
     return boot_state;
 }
+
+// Interrupt handlers that will never be called, but are used for debugging purposes
 
 static uint32_t phantomISR = 9999;
 

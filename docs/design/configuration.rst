@@ -26,6 +26,9 @@ The serial communication ports can be configured through the bootheader.
 In case the bootheader is invalid or certain settings are invalid the settings or the whole port
 configuration may revert to defaults.
 
+.. warning:: Behavior doesn't perfectly match the documentation, assume any invalid setting
+             reverts to the whole configuration to default.
+
 .. list-table:: Communication settings
     :header-rows: 1
 

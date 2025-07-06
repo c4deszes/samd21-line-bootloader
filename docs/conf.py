@@ -1,13 +1,14 @@
 import sys, os
 
 project = "samd21-line-bootloader"
-copyright = "Balazs Eszes, 2024"
+copyright = "Balazs Eszes, 2025"
 author = "Balazs Eszes"
-version = '0.1'
+version = '0.3.0'
 
 sys.path.append(os.path.abspath("./_ext"))
 
 extensions = [
+    'breathe',
     'sphinx_rtd_theme',
     'jupyter_sphinx',
     'sphinx.ext.mathjax',
@@ -24,6 +25,11 @@ extensions = [
 autosectionlabel_prefix_document = True
 
 autoclass_content = "init"
+
+# Breathe configuration
+breathe_default_project = "samd21-line-bootloader"
+breathe_projects = {}
+breathe_show_define_initializer = False
 
 html_static_path = ['_static']
 html_style = 'css/custom.css'
