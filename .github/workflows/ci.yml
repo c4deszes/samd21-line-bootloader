@@ -2,6 +2,9 @@ name: CI
 
 on:
   pull_request:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -36,6 +39,18 @@ jobs:
             _build/armgcc-debug-unix/bootloader.lss
             _build/armgcc-debug-unix/bootloader.map
           if-no-files-found: error
+
+      - name: Create release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            _build/armgcc-debug-unix/bootloader.elf
+            _build/armgcc-debug-unix/bootloader_with_crc.hex
+            _build/armgcc-debug-unix/bootloader.lss
+            _build/armgcc-debug-unix/bootloader.map
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   docs:
     name: Documentation
