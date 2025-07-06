@@ -1,7 +1,5 @@
+breathe
 Sphinx
-schemdraw[matplotlib,svgmath]
-UliEngineering
-sphinx-needs
 jupyter-sphinx
 matplotlib
 sphinx-rtd-theme
