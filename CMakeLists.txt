@@ -11,6 +11,7 @@ project(
 ################################################################################
 option(SAMD21_LINE_BL_BUILD_BINARY "Enables building the bootloader" OFF)
 option(SAMD21_LINE_BL_BUILD_TESTS "Enables library test cases" OFF)
+option(SAMD21_LINE_BL_BUILD_FUNCTIONAL_TESTS "Running functional test cases" OFF)
 option(SAMD21_LINE_BL_BUILD_DOCS "Enables documentation generation" OFF)
 
 find_package(Python REQUIRED)
@@ -138,6 +139,8 @@ endfunction()
 ################################################################################
 if(SAMD21_LINE_BL_BUILD_TESTS)
     add_subdirectory(tests/application)
+endif()
+if(SAMD21_LINE_BL_BUILD_FUNCTIONAL_TESTS)
     add_subdirectory(tests/functional)
 endif()
 

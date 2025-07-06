@@ -13,7 +13,7 @@
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/tools/cmake/armgcc-toolchain.cmake",
                 "SAMD21_LINE_BL_BUILD_BINARY": "ON",
                 "SAMD21_LINE_BL_BUILD_TESTS": "ON",
-                "SAMD21_LINE_BL_BUILD_DOCS": "OFF"
+                "SAMD21_LINE_BL_BUILD_DOCS": "ON"
             },
             "hidden": true
         },
