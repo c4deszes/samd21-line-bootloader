@@ -11,7 +11,7 @@ static uint8_t FLASH_PageWriteSize;
 static uint8_t FLASH_PageWriteBuffer[64];
 static uint8_t FLASH_PageWriteStatus;
 
-static bool FLASH_BootEntryFlag;
+static bool FLASH_BootExitFlag;
 
 void FLASH_Init(void) {
     FLASH_PageWriteFlag = false;
@@ -19,7 +19,7 @@ void FLASH_Init(void) {
     FLASH_PageWriteSize = 0;
     FLASH_PageWriteStatus = FLASH_LINE_PAGE_NOT_WRITTEN;
 
-    FLASH_BootEntryFlag = false;
+    FLASH_BootExitFlag = false;
 }
 
 void FLASH_Update(void) {
@@ -64,11 +64,11 @@ void FLASH_Update(void) {
         FLASH_PageWriteFlag = false;
     }
 
-    if (FLASH_BootEntryFlag) {
+    if (FLASH_BootExitFlag) {
         BOOT_TryEnterApplication();
 
         // Defensive coding, in case boot entry was not successful
-        FLASH_BootEntryFlag = false;
+        FLASH_BootExitFlag = false;
     }
 }
 
@@ -100,5 +100,5 @@ uint8_t FLASH_BL_GetWriteStatus(void) {
 }
 
 void FLASH_BL_ExitBoot(void) {
-    FLASH_BootEntryFlag = false;
+    FLASH_BootExitFlag = true;
 }

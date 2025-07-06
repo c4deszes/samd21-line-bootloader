@@ -1,3 +1,5 @@
+APP_SIZE = 0x2000;
+
 INCLUDE memory.ld
 
 SECTIONS
@@ -81,7 +83,7 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;
 
-    .relocate : AT (_etext)
+    .relocate :
     {
         . = ALIGN(4);
         _srelocate = .;
@@ -89,14 +91,14 @@ SECTIONS
         *(.data .data.*);
         . = ALIGN(4);
         _erelocate = .;
-    } > ram
+    } > ram AT>app_rom
 
-    .app_rom_fill : AT (_etext + SIZEOF(.relocate)) {
+    .app_rom_fill : {
         FILL(0xFFFFFFFF);
         . = ORIGIN(app_rom) + LENGTH(app_rom) - 4;
         __approm_end = .;
         LONG(0xFFFFFFFF)
-    } > app_rom
+    } > app_rom AT>app_rom
 
     /*
      *  Align here to ensure that the .bss section occupies space up to

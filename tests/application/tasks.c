@@ -61,6 +61,12 @@ bool LINE_App_PrepareResponse(uint8_t channel, uint16_t request, uint8_t* size, 
     return LINE_Diag_PrepareResponse(channel, request, size, payload);
 }
 
+void SERCOM0_Interrupt(void) {
+    SERCOM_USART_InterruptHandler(SERCOM0);
+}
+
+/// Scheduler Task
+
 void SCH_Task1ms(void) {
     SWTIMER_Update1ms();
 

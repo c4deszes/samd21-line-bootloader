@@ -81,7 +81,7 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;
 
-    .relocate : AT (_etext)
+    .relocate :
     {
         . = ALIGN(4);
         _srelocate = .;
@@ -89,14 +89,14 @@ SECTIONS
         *(.data .data.*);
         . = ALIGN(4);
         _erelocate = .;
-    } > ram
+    } > ram AT>bl_rom
 
-    .bl_rom_fill : AT (_etext + SIZEOF(.relocate)) {
+    .bl_rom_fill : {
         FILL(0xFFFFFFFF);
         . = ORIGIN(bl_rom) + LENGTH(bl_rom) - 4;
         __bootrom_end = .;
         KEEP(*(.bl_rom.crc));
-    } > bl_rom
+    } > bl_rom AT>bl_rom
 
     .bss (NOLOAD) :
 	{

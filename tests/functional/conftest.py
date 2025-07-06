@@ -1,4 +1,5 @@
 import pytest
+import configparser
 
 from pyocd.core.helpers import ConnectHelper
 from pyocd.core.target import Target
@@ -8,16 +9,40 @@ from line_protocol.protocol import LineMaster, LineSerialTransport
 from line_flash import FlashTool
 
 @pytest.fixture(scope="session")
-def target_mcu():
-    yield 'ATSAMD21E18A'
+def config():
+    config = configparser.ConfigParser()
+    config.read(".config")
+    yield config
 
 @pytest.fixture(scope="session")
-def line_port():
-    yield 'COM14'
+def binaries(config):
+    """Fixture to provide the binary paths from the configuration."""
+    yield {
+        'bootloader': config['binaries']['bootloader'],
+        'factory_header': config['binaries']['factory_header'],
+        'app_header': config['binaries']['app_header'],
+        'application': config['binaries']['application']
+    }
+
+@pytest.fixture(scope="session")
+def env():
+    """Fixture to provide the environment configuration."""
+    config = configparser.ConfigParser()
+    config.read(".env")
+    yield config['env']
+
+@pytest.fixture(scope="session")
+def target_mcu(config):
+    yield config['target']['mcu']
+
+@pytest.fixture(scope="session")
+def line_port(env):
+    yield env['port']
 
 @pytest.fixture(scope="class")
 def session(target_mcu):
-    with ConnectHelper.session_with_chosen_probe(options={'target_override': target_mcu}) as session:
+    with ConnectHelper.session_with_chosen_probe(blocking=False,
+                                                 options={'target_override': target_mcu}) as session:
         yield session
 
 @pytest.fixture(scope="class")
@@ -28,7 +53,7 @@ def target(session):
 @pytest.fixture(scope="class")
 def programmer(session):
     """Fixture to provide the FileProgrammer object."""
-    yield FileProgrammer(session)
+    yield FileProgrammer(session, keep_unwritten=True)
 
 @pytest.fixture(scope="class")
 def serial_number(target):

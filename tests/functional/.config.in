@@ -1,0 +1,8 @@
+[target]
+mcu=@SAMD21_LINE_BL_MCU@
+
+[binaries]
+bootloader=@SAMD21_LINE_BL_BINARY@
+factory_header=@SAMD21_LINE_BL_FACTORY_HEADER@
+app_header=@SAMD21_LINE_BL_APP_HEADER@
+application=@SAMD21_LINE_BL_APP@

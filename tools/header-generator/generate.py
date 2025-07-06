@@ -1,6 +1,9 @@
+# Python built-in modules
 import argparse
-import intelhex
 import json
+
+# Third-party modules
+import intelhex
 
 SERCOM0 = 0
 SERCOM1 = 1
@@ -83,6 +86,7 @@ if __name__ == '__main__':
     if args.application:
         app_hex = intelhex.IntelHex(args.application)
         segments = app_hex.segments()
+        # TODO: check if address space fits rows
         if len(segments) != 1:
             raise ValueError('Cant do CRC32 calculation on non continuous application.')
         crc = crc32(app_hex.tobinarray(segments[0][0], segments[0][1]-1))

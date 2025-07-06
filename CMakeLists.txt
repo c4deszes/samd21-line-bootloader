@@ -15,6 +15,11 @@ option(SAMD21_LINE_BL_BUILD_DOCS "Enables documentation generation" OFF)
 
 find_package(Python REQUIRED)
 
+if(SAMD21_LINE_BL_BUILD_TESTS)
+enable_testing()
+include(${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake/Pytest.cmake)
+endif()
+
 ################################################################################
 # Dependencies
 ################################################################################
@@ -47,7 +52,8 @@ set(BL_GENCODE_DIR ${CMAKE_CURRENT_BINARY_DIR}/gencode)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/metainfo.h.in
                ${BL_GENCODE_DIR}/metainfo.h)
 
-samx21_hal(hal-library ATSAMD21E18A)
+set(SAMD21_LINE_BL_MCU ATSAMD21E18A)
+samx21_hal(hal-library ${SAMD21_LINE_BL_MCU})
 
 add_executable(
     bootloader
@@ -78,6 +84,8 @@ hexify(
     HEX ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex)
 dump_symbols(bootloader ${CMAKE_CURRENT_BINARY_DIR}/bootloader.lss)
 dump_size(bootloader)
+
+set(SAMD21_LINE_BL_BINARY ${CMAKE_CURRENT_BINARY_DIR}/bootloader_with_crc.hex)
 
 add_custom_target(bootloader-crc
     COMMAND srec_cat ${CMAKE_CURRENT_BINARY_DIR}/bootloader.hex --intel -crop 0x0000 0x2FFC
@@ -130,6 +138,7 @@ endfunction()
 ################################################################################
 if(SAMD21_LINE_BL_BUILD_TESTS)
     add_subdirectory(tests/application)
+    add_subdirectory(tests/functional)
 endif()
 
 ################################################################################

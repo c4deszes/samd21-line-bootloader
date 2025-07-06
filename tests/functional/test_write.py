@@ -8,13 +8,17 @@ import random
 class TestWrite:
 
     @pytest.fixture(autouse=True, scope='class')
-    def setup(self, programmer, target):
+    def setup(self, binaries, programmer, target):
         # Setup
         target.mass_erase()
-        programmer.program('bootloader_with_crc.hex')
-        programmer.program('valid_header.hex')
+        programmer.program(binaries['bootloader'])
+        programmer.program(binaries['factory_header'])
 
     def test_WriteStatus_Initial(self, target, serial_number, line_master, flash_tool):
+        """
+        Tests whether the initial write status is set correctly when no pages have been written.
+        The device should report that no pages have been written.
+        """
         sn = serial_number
 
         # Running the bootloader
@@ -28,6 +32,10 @@ class TestWrite:
         assert write_status == FLASH_LINE_PAGE_NOT_WRITTEN
 
     def test_WriteStatus_OutOfBounds(self, target, serial_number, line_master, flash_tool):
+        """
+        Tests whether the write status is correctly reported when trying to write to an out-of-bounds address.
+        The device should report an address error.
+        """
         sn = serial_number
 
         # Running the bootloader
@@ -44,6 +52,10 @@ class TestWrite:
         assert write_status == FLASH_LINE_PAGE_ADDRESS_ERROR
 
     def test_WriteStatus_BadAlignment(self, target, serial_number, line_master, flash_tool):
+        """
+        Tests whether the write status is correctly reported when trying to write to an unaligned address.
+        The device should report an address error.
+        """
         sn = serial_number
 
         # Running the bootloader
@@ -60,6 +72,10 @@ class TestWrite:
         assert write_status == FLASH_LINE_PAGE_ADDRESS_ERROR
 
     def test_WriteStatus_BadSize(self, target, serial_number, line_master, flash_tool):
+        """
+        Tests whether the write status is correctly reported when trying to write a page with an invalid size.
+        The device should report a page size error.
+        """
         sn = serial_number
 
         # Running the bootloader
@@ -76,6 +92,11 @@ class TestWrite:
         assert write_status == FLASH_LINE_PAGE_ADDRESS_ERROR
 
     def test_WriteStatus_ValidWrite(self, target, serial_number, line_master, flash_tool):
+        """
+        Tests whether the write status is correctly reported and the device writes the right page
+        when requesting a valid write operation.
+        The device should report success after writing a valid page.
+        """
         sn = serial_number
 
         # Running the bootloader
