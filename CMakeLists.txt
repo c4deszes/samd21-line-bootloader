@@ -4,7 +4,7 @@ project(
     samd21-line-bootloader
     DESCRIPTION "Bootloader for SAMD21 devices over LINE protocol"
     LANGUAGES C CXX ASM
-    VERSION 0.3.0)
+    VERSION 0.4.0)
 
 ################################################################################
 # Options
@@ -25,8 +25,8 @@ endif()
 ################################################################################
 include(tools/cmake/CPM.cmake)
 CPMAddPackage("gh:c4deszes/bike-line-protocol@0.3.0")
-CPMAddPackage("gh:c4deszes/samd21-hal#feature/new-peripherals2")
-CPMAddPackage("gh:c4deszes/bike-flash-tool#feature/line-lib-update")
+CPMAddPackage("gh:c4deszes/samd21-hal@0.4.0")
+CPMAddPackage("gh:c4deszes/bike-flash-tool@0.2.0")
 
 ################################################################################
 # Interface
