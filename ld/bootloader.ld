@@ -66,6 +66,9 @@ SECTIONS
         KEEP (*(SORT(.dtors.*)))
         KEEP (*crtend.o(.dtors))
 
+        /* Application metadata */
+        KEEP (*(.git_commit_sha))
+
         . = ALIGN(4);
         _efixed = .;            /* End of text section */
     } > bl_rom

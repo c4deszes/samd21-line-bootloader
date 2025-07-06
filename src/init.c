@@ -20,7 +20,7 @@
 #include "sam.h"
 
 // TODO: prevent linker from removing this symbol
-static const char GIT_COMMIT_SHA[] __attribute__((used)) = BL_GIT_COMMIT;
+static const char GIT_COMMIT_SHA[] __attribute__((used, section(".git_commit_sha"))) = BL_GIT_COMMIT;
 
 void Initialize(void) {
     // TODO: enable watchdog
